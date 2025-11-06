@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedVelvet Platform - Премиум платформа эскорт-услуг</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">RedVelvet</div>
+            <nav id="mainNav">
+                <!-- Кнопки будут динамически обновляться через JavaScript -->
+            </nav>
+        </div>
+    </header>
+
+    <!-- Интерфейс для клиентов (просмотр анкет) -->
+    <div id="clientInterface" class="container">
+        <!-- Поиск и фильтры -->
+        <div class="filters">
+            <div class="filters-header-wrapper expanded">
+                <div class="filters-header" onclick="toggleFilters()">
+                    <h3>Поиск и фильтры</h3>
+                </div>
+                <span class="filters-toggle active" onclick="toggleFilters()">▼</span>
+                <!-- Поиск по ключевым словам -->
+                <div class="search-box" id="searchBoxMain">
+                    <input type="text" id="searchKeywords" placeholder="Поиск по имени или ключевым словам..." oninput="applyFilters()">
+                </div>
+            </div>
+            <div class="filters-content active">
+                <!-- Вкладки фильтров -->
+                <div class="filter-tabs">
+                    <div class="filter-tab active" onclick="switchFilterTab('basic')">Основные</div>
+                    <div class="filter-tab" onclick="switchFilterTab('services')">Услуги</div>
+                    <div class="filter-tab" onclick="switchFilterTab('appearance')">Внешность</div>
+                    <div class="filter-tab" onclick="switchFilterTab('params')">Параметры</div>
+                </div>
+
+                <!-- Основные фильтры -->
+                <div class="filter-section active" id="basicFilters">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Возраст от</label>
+                            <input type="number" id="filterAgeFrom" placeholder="18" min="18" oninput="applyFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Возраст до</label>
+                            <input type="number" id="filterAgeTo" placeholder="50" max="99" oninput="applyFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Город</label>
+                            <select id="filterCity" onchange="applyFilters()">
+                                <option value="">Все города</option>
+                                <option value="moscow">Москва</option>
+                                <option value="spb">Санкт-Петербург</option>
+                                <option value="krasnodar">Краснодар</option>
+                                <option value="sochi">Сочи</option>
+                                <option value="ekaterinburg">Екатеринбург</option>
+                                <option value="kazan">Казань</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Рейтинг</label>
+                            <select id="filterRating" onchange="applyFilters()">
+                                <option value="">Любой</option>
+                                <option value="5">5 звезд</option>
+                                <option value="4">4+ звезды</option>
+                                <option value="3">3+ звезды</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Фильтры по внешности -->
+                <div class="filter-section" id="appearanceFilters">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Цвет глаз</label>
+                            <select id="filterEyeColor" onchange="applyFilters()">
+                                <option value="">Любой</option>
+                                <option value="Карие">Карие</option>
+                                <option value="Зеленые">Зеленые</option>
+                                <option value="Голубые">Голубые</option>
+                                <option value="Серые">Серые</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Цвет волос</label>
+                            <select id="filterHairColor" onchange="applyFilters()">
+                                <option value="">Любой</option>
+                                <option value="Блондинка">Блондинка</option>
+                                <option value="Брюнетка">Брюнетка</option>
+                                <option value="Шатенка">Шатенка</option>
+                                <option value="Рыжая">Рыжая</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Национальность</label>
+                            <select id="filterNationality" onchange="applyFilters()">
+                                <option value="">Любая</option>
+                                <option value="Славянка">Славянка</option>
+                                <option value="Азиатка">Азиатка</option>
+                                <option value="Латиноамериканка">Латиноамериканка</option>
+                                <option value="Африканка">Африканка</option>
+                                <option value="Смешанная">Смешанная</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Размер груди</label>
+                            <select id="filterBustSize" onchange="applyFilters()">
+                                <option value="">Любой</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6+">6+</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Фильтры по параметрам -->
+                <div class="filter-section" id="paramsFilters">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Рост от (см)</label>
+                            <input type="number" id="filterHeightFrom" placeholder="150" oninput="applyFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Рост до (см)</label>
+                            <input type="number" id="filterHeightTo" placeholder="190" oninput="applyFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Вес от (кг)</label>
+                            <input type="number" id="filterWeightFrom" placeholder="40" oninput="applyFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Вес до (кг)</label>
+                            <input type="number" id="filterWeightTo" placeholder="80" oninput="applyFilters()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Фильтры по услугам -->
+                <div class="filter-section" id="servicesFilters">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Цена от (₽/час)</label>
+                            <input type="number" id="filterPriceFrom" placeholder="1000" oninput="applyFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Цена до (₽/час)</label>
+                            <input type="number" id="filterPriceTo" placeholder="50000" oninput="applyFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Услуги</label>
+                            <select id="filterServiceType" onchange="applyFilters()">
+                                <option value="">Все услуги</option>
+                                <!-- Опции будут динамически добавлены из доступных услуг -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profiles-grid" id="profilesGrid">
+            <!-- Профили будут добавлены через JavaScript -->
+        </div>
+    </div>
+
+    <!-- Личный кабинет клиента -->
+    <div id="clientDashboard" class="container hidden">
+        <div class="dashboard-header">
+            <h2>Личный кабинет клиента</h2>
+            <div class="dashboard-actions">
+                <button class="btn btn-outline" onclick="showWalletModal()">Привязать криптокошелек</button>
+                <button class="btn btn-outline" onclick="logout()">Выход</button>
+            </div>
+        </div>
+
+        <div class="wallet-info" id="clientWalletInfo">
+            <h3>Кошелек</h3>
+            <p class="wallet-status">Кошелек не привязан</p>
+        </div>
+
+        <div class="favorites-section">
+            <h3>Избранные анкеты</h3>
+            <div class="profiles-grid" id="favoritesGrid">
+                <p class="no-data">У вас пока нет избранных анкет</p>
+            </div>
+        </div>
+
+        <div class="reviews-history">
+            <h3>Мои отзывы</h3>
+            <div id="myReviewsList">
+                <p class="no-data">Вы еще не оставляли отзывов</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Интерфейс для моделей -->
+    <div id="modelInterface" class="container hidden">
+        <div class="dashboard active">
+            <div class="dashboard-header">
+                <h2 id="modelDashboardTitle">Панель управления модели</h2>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="viewsCount">0</div>
+                        <div class="stat-card-label">Просмотров</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="ratingValue">0.0</div>
+                        <div class="stat-card-label">Рейтинг</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="reviewsCount">0</div>
+                        <div class="stat-card-label">Отзывов</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="rankPosition">-</div>
+                        <div class="stat-card-label">Позиция в рейтинге</div>
+                    </div>
+                </div>
+                <div class="dashboard-actions" style="display: flex; justify-content: center; margin-top: 20px;">
+                    <button class="btn btn-outline" onclick="showWalletModal()">Привязать криптокошелек</button>
+                </div>
+                <div class="wallet-info" id="modelWalletInfo" style="margin-top: 20px;">
+                    <p class="wallet-status">Кошелек не привязан</p>
+                </div>
+            </div>
+
+            <div class="profile-form">
+                <h2 id="profileFormTitle">Создать анкету</h2>
+                <p style="color: var(--text-gray); margin-bottom: 30px; text-align: center;">
+                    Заполните все обязательные поля для создания профессиональной анкеты
+                </p>
+                <form id="profileFormElement" onsubmit="saveProfile(event)">
+                    <div class="toggle-group">
+                        <div class="toggle-group-title">Основная информация</div>
+                        <div class="form-group">
+                            <label>Имя (псевдоним) *</label>
+                            <input type="text" id="profileName" required>
+                        </div>
+
+                    <div class="form-group">
+                        <label>Возраст *</label>
+                        <input type="number" id="profileAge" min="18" max="99" required>
+                    </div>
+
+                        <div class="form-group">
+                            <label>Город *</label>
+                            <select id="profileCity" required>
+                                <option value="">Выберите город</option>
+                                <option value="moscow">Москва</option>
+                                <option value="spb">Санкт-Петербург</option>
+                                <option value="krasnodar">Краснодар</option>
+                                <option value="sochi">Сочи</option>
+                                <option value="ekaterinburg">Екатеринбург</option>
+                                <option value="kazan">Казань</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-group-title">Параметры тела</div>
+
+                    <div class="form-group">
+                        <label>Рост (см) *</label>
+                        <input type="number" id="profileHeight" placeholder="170" min="140" max="220" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Вес (кг) *</label>
+                        <input type="number" id="profileWeight" placeholder="55" min="40" max="150" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Размер груди *</label>
+                        <select id="profileBustSize" required>
+                            <option value="">Выберите размер</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6+">6+</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Цвет глаз *</label>
+                        <select id="profileEyeColor" required>
+                            <option value="">Выберите цвет</option>
+                            <option value="Карие">Карие</option>
+                            <option value="Зеленые">Зеленые</option>
+                            <option value="Голубые">Голубые</option>
+                            <option value="Серые">Серые</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Цвет волос *</label>
+                        <select id="profileHairColor" required>
+                            <option value="">Выберите цвет</option>
+                            <option value="Блондинка">Блондинка</option>
+                            <option value="Брюнетка">Брюнетка</option>
+                            <option value="Шатенка">Шатенка</option>
+                            <option value="Рыжая">Рыжая</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Национальность *</label>
+                        <select id="profileNationality" required>
+                            <option value="">Выберите национальность</option>
+                            <option value="Славянка">Славянка</option>
+                            <option value="Азиатка">Азиатка</option>
+                            <option value="Латиноамериканка">Латиноамериканка</option>
+                            <option value="Африканка">Африканка</option>
+                            <option value="Смешанная">Смешанная</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Фигура *</label>
+                        <select id="profileBodyType" required>
+                            <option value="">Выберите тип фигуры</option>
+                            <option value="Стройная">Стройная</option>
+                            <option value="Спортивная">Спортивная</option>
+                            <option value="Аппетитная">Аппетитная</option>
+                            <option value="Модельная">Модельная</option>
+                        </select>
+                    </div>
+
+                        <div class="form-group">
+                            <label>Размер одежды *</label>
+                            <select id="profileClothingSize" required>
+                                <option value="">Выберите размер</option>
+                                <option value="XS">XS (40-42)</option>
+                                <option value="S">S (42-44)</option>
+                                <option value="M">M (44-46)</option>
+                                <option value="L">L (46-48)</option>
+                                <option value="XL">XL (48-50)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-group-title">О себе</div>
+
+                        <div class="form-group">
+                            <label>Описание анкеты *</label>
+                            <textarea id="profileDescription" rows="4" required placeholder="Расскажите о себе..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Услуги (выберите все подходящие)</label>
+                        <p style="font-size: 12px; color: var(--text-gray); margin-bottom: 15px;">
+                            Используйте тумблеры для выбора предоставляемых услуг
+                        </p>
+
+                        <div class="toggle-group">
+                            <div class="toggle-group-title">Классический секс</div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleClassicSex">Классический секс</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleClassicSex" name="service" value="Классический секс">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleCondomSex">Секс в презервативе</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleCondomSex" name="service" value="Секс в презервативе">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleNoCondom">Секс без презерватива</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleNoCondom" name="service" value="Секс без презерватива">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div class="toggle-group-title">Оральные услуги</div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleBlowjobCondom">Минет в презервативе</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleBlowjobCondom" name="service" value="Минет в презервативе">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleBlowjobNoCondom">Минет без презерватива</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleBlowjobNoCondom" name="service" value="Минет без презерватива">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleDeepThroat">Минет глубокий</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleDeepThroat" name="service" value="Минет глубокий">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleBlowjobCar">Минет в машине</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleBlowjobCar" name="service" value="Минет в машине">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleCumInMouth">Окончание в рот</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleCumInMouth" name="service" value="Окончание в рот">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleCunnilingus">Куннилингус</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleCunnilingus" name="service" value="Куннилингус">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div class="toggle-group-title">Анальный секс</div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleAnalSex">Анальный секс</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleAnalSex" name="service" value="Анальный секс">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleAnalFisting">Анальный фистинг</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleAnalFisting" name="service" value="Анальный фистинг">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div class="toggle-group-title">Массаж и релакс</div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleEroticMassage">Эротический массаж</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleEroticMassage" name="service" value="Эротический массаж">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleRelaxMassage">Расслабляющий массаж</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleRelaxMassage" name="service" value="Расслабляющий массаж">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleProstateMassage">Массаж простаты</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleProstateMassage" name="service" value="Массаж простаты">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleUrologicalMassage">Урологический массаж</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleUrologicalMassage" name="service" value="Урологический массаж">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div class="toggle-group-title">Групповые программы</div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleLesbianShow">Лесби-шоу</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleLesbianShow" name="service" value="Лесби-шоу">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleGroupSex">Групповой секс</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleGroupSex" name="service" value="Групповой секс">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleFMF">ЖМЖ</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleFMF" name="service" value="ЖМЖ">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleMFM">МЖМ</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleMFM" name="service" value="МЖМ">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div class="toggle-group-title">БДСМ и экстрим</div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleBDSM">БДСМ</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleBDSM" name="service" value="БДСМ">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleDomination">Доминация</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleDomination" name="service" value="Доминация">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleSubmission">Подчинение</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleSubmission" name="service" value="Подчинение">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleStrapon">Страпон</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleStrapon" name="service" value="Страпон">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleFetish">Фетиш</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleFetish" name="service" value="Фетиш">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleGoldenShower">Золотой дождь</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleGoldenShower" name="service" value="Золотой дождь">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleRoleplay">Ролевые игры</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleRoleplay" name="service" value="Ролевые игры">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div class="toggle-group-title">Дополнительные услуги</div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleStriptease">Стриптиз</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleStriptease" name="service" value="Стриптиз">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleEscort">Эскорт</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleEscort" name="service" value="Эскорт">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleVIPEscort">VIP сопровождение</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleVIPEscort" name="service" value="VIP сопровождение">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleOutcallHotel">Выезд в отель</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleOutcallHotel" name="service" value="Выезд в отель">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleOutcallHome">Выезд на дом</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleOutcallHome" name="service" value="Выезд на дом">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="togglePhotoVideo">Фото/видео съемка</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="togglePhotoVideo" name="service" value="Фото/видео съемка">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleForCouples">Услуги для пар</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleForCouples" name="service" value="Услуги для пар">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-wrapper">
+                                <label class="toggle-label" for="toggleForWomen">Услуги для женщин</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleForWomen" name="service" value="Услуги для женщин">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-group-title">Стоимость услуг</div>
+                        <div class="form-group">
+                            <label>Цена (₽/час) *</label>
+                            <input type="number" id="profilePrice" min="1000" required placeholder="Например: 8000">
+                        </div>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-group-title">Медиа контент</div>
+                        <div class="form-group">
+                            <label>Фото и видео</label>
+                        <div class="file-upload" onclick="document.getElementById('mediaUpload').click()">
+                            <div class="upload-icon">📷</div>
+                            <p>Нажмите для загрузки фото или видео</p>
+                            <p style="font-size: 12px; color: var(--text-gray); margin-top: 10px;">
+                                Поддерживаются: JPG, PNG, MP4 (макс. 10 МБ)
+                            </p>
+                            <input type="file" id="mediaUpload" multiple accept="image/*,video/*" onchange="handleMediaUpload(event)">
+                        </div>
+                            <div class="media-preview" id="mediaPreview"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-outline" style="width: 100%; margin-top: 20px; font-size: 18px; padding: 15px;">
+                        Сохранить анкету
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+
+    <!-- Модальное окно регистрации клиента -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
+            <h2>Регистрация клиента</h2>
+            <p style="color: var(--text-gray); margin-bottom: 20px;">
+                Регистрация предназначена для клиентов платформы
+            </p>
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль *</label>
+                    <input type="password" id="registerPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Подтвердите пароль *</label>
+                    <input type="password" id="registerPasswordConfirm" required minlength="6">
+                </div>
+
+                <div class="form-group">
+                    <div class="toggle-wrapper" style="margin-bottom: 15px;">
+                        <label class="toggle-label" for="acceptTerms">Я принимаю условия использования и политику конфиденциальности *</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="acceptTerms" required>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-wrapper">
+                        <label class="toggle-label" for="subscribeNewsletter">Подписаться на новости и акции</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="subscribeNewsletter">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-outline" style="width: 100%;">Зарегистрироваться</button>
+                <p style="text-align: center; margin-top: 15px; color: var(--text-gray);">
+                    Уже есть аккаунт? <a href="#" onclick="closeModal('registerModal'); showLogin(); return false;" style="color: var(--primary-orange);">Войти</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно входа -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+            <h2>Вход</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-outline" style="width: 100%;">Войти</button>
+                <p style="text-align: center; margin-top: 15px; color: var(--text-gray);">
+                    Нет аккаунта? <a href="#" onclick="closeModal('loginModal'); showRegister(); return false;" style="color: var(--primary-orange);">Зарегистрироваться</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно привязки криптокошелька -->
+    <div id="walletModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('walletModal')">&times;</button>
+            <h2>Привязать криптокошелек</h2>
+            <form onsubmit="handleWalletLink(event)">
+                <div class="form-group">
+                    <label>Тип кошелька *</label>
+                    <select id="walletType" required>
+                        <option value="">Выберите тип</option>
+                        <option value="BTC">Bitcoin (BTC)</option>
+                        <option value="ETH">Ethereum (ETH)</option>
+                        <option value="USDT">Tether (USDT)</option>
+                        <option value="TON">TON</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Адрес кошелька *</label>
+                    <input type="text" id="walletAddress" required placeholder="Введите адрес вашего кошелька">
+                </div>
+                <button type="submit" class="btn btn-outline" style="width: 100%;">Привязать</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно детального просмотра профиля -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close" onclick="closeModal('profileModal')">&times;</button>
+            <div id="profileModalContent">
+                <!-- Содержимое будет добавлено через JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно отзыва -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('reviewModal')">&times;</button>
+            <h2>Оставить отзыв</h2>
+            <form onsubmit="handleReviewSubmit(event)">
+                <div class="form-group">
+                    <label>Оценка *</label>
+                    <div class="rating-select" id="ratingSelect">
+                        <span class="star-select empty" onclick="setReviewRating(1)">★</span>
+                        <span class="star-select empty" onclick="setReviewRating(2)">★</span>
+                        <span class="star-select empty" onclick="setReviewRating(3)">★</span>
+                        <span class="star-select empty" onclick="setReviewRating(4)">★</span>
+                        <span class="star-select empty" onclick="setReviewRating(5)">★</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Отзыв *</label>
+                    <textarea id="reviewText" rows="5" required placeholder="Напишите ваш отзыв..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-outline" style="width: 100%;">Отправить отзыв</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно выбора способа оплаты -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+            <h2>Выберите способ оплаты</h2>
+            <div class="payment-options">
+                <button class="btn btn-outline payment-option" onclick="selectPaymentMethod('crypto')" style="width: 100%; margin-bottom: 15px;">
+                    Оплата криптовалютой
+                </button>
+                <button class="btn btn-outline payment-option" onclick="selectPaymentMethod('agreement')" style="width: 100%;">
+                    По договоренности
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/js/app.js"></script>
+</body>
+</html>
