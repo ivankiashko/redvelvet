@@ -62,6 +62,76 @@ function saveToLocalStorage() {
     }
 }
 
+// ==================== TOAST УВЕДОМЛЕНИЯ ====================
+function showToast(message, type = 'info', duration = 5000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const titles = {
+        'success': '✓ Успешно',
+        'error': '✗ Ошибка',
+        'info': 'ℹ Информация',
+        'warning': '⚠ Внимание'
+    };
+
+    toast.innerHTML = `
+        <div class="toast-header">${titles[type] || titles['info']}</div>
+        <div class="toast-body">${message}</div>
+        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+    `;
+
+    container.appendChild(toast);
+
+    // Автоматическое удаление через duration
+    setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+function showConfirm(message, onConfirm, onCancel) {
+    // Создаем кастомный диалог подтверждения
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.style.zIndex = '10001';
+
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 style="margin-bottom: 20px;">Подтверждение</h2>
+            <p style="color: var(--text-gray); line-height: 1.6; white-space: pre-line; margin-bottom: 30px;">${message}</p>
+            <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                <button class="btn btn-outline cancel-btn" style="min-width: 120px;">Отмена</button>
+                <button class="btn btn-primary confirm-btn" style="min-width: 120px;">ОК</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Привязываем обработчики
+    const confirmBtn = modal.querySelector('.confirm-btn');
+    const cancelBtn = modal.querySelector('.cancel-btn');
+
+    confirmBtn.onclick = () => {
+        modal.remove();
+        if (onConfirm) onConfirm();
+    };
+
+    cancelBtn.onclick = () => {
+        modal.remove();
+        if (onCancel) onCancel();
+    };
+
+    // Закрытие по клику вне модального окна
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            if (onCancel) onCancel();
+        }
+    };
+}
+
 // ==================== НАВИГАЦИЯ И ИНТЕРФЕЙС ====================
 function updateNavigation() {
     const nav = document.getElementById('mainNav');
@@ -788,62 +858,58 @@ function selectPricingPlan(plan, price) {
     const hasWallet = AppState.currentUser && AppState.currentUser.wallet;
 
     // Формируем сообщение с доступными способами оплаты
-    let paymentMessage = `Вы выбрали тариф "${planNames[plan]}"\n` +
-        `Стоимость: ${price.toLocaleString('ru-RU')} ₽/месяц\n\n` +
-        `Доступные способы оплаты:\n`;
+    let paymentMessage = `Вы выбрали тариф "${planNames[plan]}"\nСтоимость: ${price.toLocaleString('ru-RU')} ₽/месяц\n\nДоступные способы оплаты:\n`;
 
     if (hasWallet) {
         paymentMessage += `1. Криптовалюта (${AppState.currentUser.wallet.type})\n`;
     }
-    paymentMessage += `${hasWallet ? '2' : '1'}. Наличные при личной встрече\n\n`;
-    paymentMessage += `Нажмите ОК для активации тарифа (демо-режим)`;
+    paymentMessage += `${hasWallet ? '2' : '1'}. Наличные при личной встрече\n\nНажмите ОК для активации тарифа (демо-режим)`;
 
-    const confirmed = confirm(paymentMessage);
+    showConfirm(paymentMessage, () => {
+        // Функция после подтверждения
+        const processPayment = (paymentMethod) => {
+            // Устанавливаем статус оплаты
+            AppState.profilePaymentStatus = plan;
+            saveToLocalStorage();
 
-    if (confirmed) {
+            // Закрываем модальное окно
+            closeModal('pricingModal');
+
+            // Обновляем навигацию для отображения новой кнопки
+            updateNavigation();
+
+            // Формируем сообщение об успехе с информацией о способе оплаты
+            let successMessage = `Тариф "${planNames[plan]}" успешно активирован!\n\n`;
+
+            if (paymentMethod === 'crypto') {
+                successMessage += `Способ оплаты: Криптовалюта (${AppState.currentUser.wallet.type})\nКошелек: ${AppState.currentUser.wallet.address}\n\n`;
+            } else {
+                successMessage += `Способ оплаты: Наличные при личной встрече\n\n`;
+            }
+
+            successMessage += `Ваша анкета получит:\n`;
+            if (plan === 'basic') {
+                successMessage += '- Базовое размещение\n- До 5 фотографий\n- Базовая статистика';
+            } else if (plan === 'premium') {
+                successMessage += '- Приоритетное размещение\n- До 15 фотографий\n- Расширенная статистика\n- Бейдж "Проверено"';
+            } else if (plan === 'vip') {
+                successMessage += '- Топ размещение\n- Неограниченно фотографий\n- Полная аналитика\n- Бейдж "VIP Проверено"\n- Продвижение в соцсетях';
+            }
+
+            showToast(successMessage, 'success', 7000);
+        };
+
         // Если есть кошелек, спрашиваем способ оплаты
-        let paymentMethod = 'cash'; // По умолчанию наличные
-
         if (hasWallet) {
-            const useCrypto = confirm(
-                `Выберите способ оплаты:\n\n` +
-                `ОК - Оплата криптовалютой (${AppState.currentUser.wallet.type})\n` +
-                `Отмена - Оплата наличными при встрече`
+            showConfirm(
+                `Выберите способ оплаты:\n\nОК - Оплата криптовалютой (${AppState.currentUser.wallet.type})\nОтмена - Оплата наличными при встрече`,
+                () => processPayment('crypto'),
+                () => processPayment('cash')
             );
-            paymentMethod = useCrypto ? 'crypto' : 'cash';
-        }
-
-        // Устанавливаем статус оплаты
-        AppState.profilePaymentStatus = plan;
-        saveToLocalStorage();
-
-        // Закрываем модальное окно
-        closeModal('pricingModal');
-
-        // Обновляем навигацию для отображения новой кнопки
-        updateNavigation();
-
-        // Формируем сообщение об успехе с информацией о способе оплаты
-        let successMessage = `Тариф "${planNames[plan]}" успешно активирован!\n\n`;
-
-        if (paymentMethod === 'crypto') {
-            successMessage += `Способ оплаты: Криптовалюта (${AppState.currentUser.wallet.type})\n`;
-            successMessage += `Кошелек: ${AppState.currentUser.wallet.address}\n\n`;
         } else {
-            successMessage += `Способ оплаты: Наличные при личной встрече\n\n`;
+            processPayment('cash');
         }
-
-        successMessage += `Ваша анкета получит:\n`;
-        if (plan === 'basic') {
-            successMessage += '- Базовое размещение\n- До 5 фотографий\n- Базовая статистика';
-        } else if (plan === 'premium') {
-            successMessage += '- Приоритетное размещение\n- До 15 фотографий\n- Расширенная статистика\n- Бейдж "Проверено"';
-        } else if (plan === 'vip') {
-            successMessage += '- Топ размещение\n- Неограниченно фотографий\n- Полная аналитика\n- Бейдж "VIP Проверено"\n- Продвижение в соцсетях';
-        }
-
-        alert(successMessage);
-    }
+    });
 }
 
 function showMyProfileView() {
@@ -851,7 +917,9 @@ function showMyProfileView() {
     if (AppState.currentProfile && AppState.currentProfile.id) {
         openProfileModal(AppState.currentProfile.id);
     } else {
-        alert('Сначала создайте и сохраните анкету');
+        // Если анкеты нет, показываем тарифы чтобы мотивировать создать анкету
+        showToast('Сначала создайте анкету и выберите тариф для её размещения', 'info', 4000);
+        showPricingModal();
     }
 }
 
