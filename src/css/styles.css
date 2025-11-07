@@ -1510,3 +1510,237 @@ nav {
 .toggle-group .toggle-wrapper:last-child {
     margin-bottom: 0;
 }
+
+/* Pricing Cards - Тарифные планы */
+.pricing-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 20px;
+}
+
+@media (max-width: 1024px) {
+    .pricing-cards {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+}
+
+.pricing-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 2px solid var(--glass-border);
+    border-radius: 25px;
+    padding: 35px;
+    position: relative;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease;
+}
+
+.pricing-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+    transition: left 0.6s ease;
+    z-index: 0;
+}
+
+.pricing-card:hover::before {
+    left: 100%;
+}
+
+.pricing-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 0 40px rgba(255, 107, 53, 0.5), 0 15px 30px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 107, 53, 0.6);
+}
+
+.pricing-card-premium {
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 30px rgba(255, 107, 53, 0.4);
+    transform: scale(1.05);
+    z-index: 1;
+}
+
+.pricing-card-premium:hover {
+    transform: translateY(-10px) scale(1.07);
+    box-shadow: 0 0 50px rgba(255, 107, 53, 0.7), 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.pricing-badge {
+    position: absolute;
+    top: -12px;
+    right: 30px;
+    background: linear-gradient(135deg, var(--medium-gray), var(--light-gray));
+    color: var(--text-white);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid var(--glass-border);
+    z-index: 2;
+}
+
+.pricing-badge-premium {
+    background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange), var(--light-orange));
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+    animation: premiumBadgePulse 2s ease-in-out infinite;
+}
+
+@keyframes premiumBadgePulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 107, 53, 0.8);
+    }
+}
+
+.pricing-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.pricing-header h3 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.pricing-price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 5px;
+}
+
+.price-amount {
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--primary-orange);
+    line-height: 1;
+    text-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
+}
+
+.price-currency {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--secondary-orange);
+}
+
+.price-period {
+    font-size: 16px;
+    color: var(--text-gray);
+    font-weight: 500;
+}
+
+.pricing-features {
+    margin: 30px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.pricing-feature {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 10px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.pricing-feature:hover:not(.disabled) {
+    background: rgba(255, 107, 53, 0.1);
+    transform: translateX(5px);
+}
+
+.pricing-feature.disabled {
+    opacity: 0.4;
+}
+
+.feature-icon {
+    font-size: 20px;
+    font-weight: 700;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pricing-feature:not(.disabled) .feature-icon {
+    color: var(--primary-orange);
+    text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+}
+
+.pricing-feature.disabled .feature-icon {
+    color: var(--text-gray);
+}
+
+.feature-text {
+    font-size: 15px;
+    color: var(--text-white);
+    font-weight: 500;
+}
+
+.pricing-feature.disabled .feature-text {
+    color: var(--text-gray);
+    text-decoration: line-through;
+}
+
+.pricing-card .btn {
+    position: relative;
+    z-index: 1;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Profile Payment Status Indicator */
+.profile-payment-status {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 15px;
+}
+
+.profile-payment-status.paid {
+    background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
+    color: var(--text-white);
+    box-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+.profile-payment-status.unpaid {
+    background: rgba(58, 58, 58, 0.8);
+    color: var(--text-gray);
+    border: 1px solid var(--glass-border);
+}
+
+@keyframes statusPulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(255, 107, 53, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 107, 53, 0.7);
+    }
+}

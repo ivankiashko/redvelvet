@@ -9,7 +9,8 @@ const AppState = {
     currentProfileView: null, // ID текущего просматриваемого профиля
     selectedReviewRating: 0,
     mediaFiles: [], // Загруженные медиа файлы
-    inModelCreationMode: false // Флаг для отслеживания режима создания/редактирования анкеты
+    inModelCreationMode: false, // Флаг для отслеживания режима создания/редактирования анкеты
+    profilePaymentStatus: null // Статус оплаты анкеты: null, 'basic', 'premium', 'vip'
 };
 
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
@@ -38,11 +39,13 @@ function loadFromLocalStorage() {
     const savedProfile = localStorage.getItem('redvelvet_profile');
     const savedProfiles = localStorage.getItem('redvelvet_profiles');
     const savedReviews = localStorage.getItem('redvelvet_reviews');
+    const savedPaymentStatus = localStorage.getItem('redvelvet_payment_status');
 
     if (savedUser) AppState.currentUser = JSON.parse(savedUser);
     if (savedProfile) AppState.currentProfile = JSON.parse(savedProfile);
     if (savedProfiles) AppState.profiles = JSON.parse(savedProfiles);
     if (savedReviews) AppState.reviews = JSON.parse(savedReviews);
+    if (savedPaymentStatus) AppState.profilePaymentStatus = savedPaymentStatus;
 }
 
 function saveToLocalStorage() {
@@ -54,6 +57,9 @@ function saveToLocalStorage() {
     }
     localStorage.setItem('redvelvet_profiles', JSON.stringify(AppState.profiles));
     localStorage.setItem('redvelvet_reviews', JSON.stringify(AppState.reviews));
+    if (AppState.profilePaymentStatus) {
+        localStorage.setItem('redvelvet_payment_status', AppState.profilePaymentStatus);
+    }
 }
 
 // ==================== НАВИГАЦИЯ И ИНТЕРФЕЙС ====================
@@ -63,9 +69,22 @@ function updateNavigation() {
 
     // Если в режиме создания/редактирования анкеты
     if (AppState.inModelCreationMode) {
-        nav.innerHTML = `
-            <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
-        `;
+        // Проверяем статус оплаты анкеты
+        const isPaid = AppState.profilePaymentStatus !== null;
+
+        if (isPaid) {
+            // Оплаченная анкета: показываем "Моя анкета" слева от "Главное меню"
+            nav.innerHTML = `
+                <button class="btn btn-outline" onclick="showMyProfileView()">Моя анкета</button>
+                <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
+            `;
+        } else {
+            // Неоплаченная анкета: показываем "Оплатить анкету" слева от "Главное меню"
+            nav.innerHTML = `
+                <button class="btn btn-outline" onclick="showPricingModal()">Оплатить анкету</button>
+                <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
+            `;
+        }
         return;
     }
 
@@ -252,9 +271,11 @@ function logout() {
     // Сохраняем профили и отзывы, но удаляем пользователя
     localStorage.removeItem('redvelvet_user');
     localStorage.removeItem('redvelvet_profile');
+    localStorage.removeItem('redvelvet_payment_status');
     AppState.currentUser = null;
     AppState.currentProfile = null;
     AppState.mediaFiles = [];
+    AppState.profilePaymentStatus = null;
 
     updateNavigation();
     showClientInterface();
@@ -748,6 +769,57 @@ function selectPaymentMethod(method) {
     }
 
     showModal('profileModal');
+}
+
+// ==================== ТАРИФЫ ОПЛАТЫ АНКЕТЫ ====================
+function showPricingModal() {
+    showModal('pricingModal');
+}
+
+function selectPricingPlan(plan, price) {
+    // Подтверждение выбора тарифа
+    const planNames = {
+        'basic': 'Стандарт',
+        'premium': 'Премиум',
+        'vip': 'Эксклюзив'
+    };
+
+    const confirmed = confirm(
+        `Вы выбрали тариф "${planNames[plan]}"\n` +
+        `Стоимость: ${price.toLocaleString('ru-RU')} ₽/месяц\n\n` +
+        `Для оплаты тарифа свяжитесь с администратором платформы.\n\n` +
+        `Нажмите ОК для активации тарифа (демо-режим)`
+    );
+
+    if (confirmed) {
+        // Устанавливаем статус оплаты
+        AppState.profilePaymentStatus = plan;
+        saveToLocalStorage();
+
+        // Закрываем модальное окно
+        closeModal('pricingModal');
+
+        // Обновляем навигацию для отображения новой кнопки
+        updateNavigation();
+
+        // Показываем сообщение об успехе
+        alert(
+            `Тариф "${planNames[plan]}" успешно активирован!\n\n` +
+            `Теперь ваша анкета получит:\n` +
+            (plan === 'basic' ? '- Базовое размещение\n- До 5 фотографий\n- Базовая статистика' : '') +
+            (plan === 'premium' ? '- Приоритетное размещение\n- До 15 фотографий\n- Расширенная статистика\n- Бейдж "Проверено"' : '') +
+            (plan === 'vip' ? '- Топ размещение\n- Неограниченно фотографий\n- Полная аналитика\n- Бейдж "VIP Проверено"\n- Продвижение в соцсетях' : '')
+        );
+    }
+}
+
+function showMyProfileView() {
+    // Открываем детальный просмотр своей анкеты
+    if (AppState.currentProfile && AppState.currentProfile.id) {
+        openProfileModal(AppState.currentProfile.id);
+    } else {
+        alert('Сначала создайте и сохраните анкету');
+    }
 }
 
 // ==================== ОТЗЫВЫ ====================

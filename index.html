@@ -811,6 +811,149 @@
         </div>
     </div>
 
+    <!-- Модальное окно с тарифами оплаты анкеты -->
+    <div id="pricingModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <button class="modal-close" onclick="closeModal('pricingModal')">&times;</button>
+            <h2>Выберите тариф для вашей анкеты</h2>
+            <p style="color: var(--text-gray); margin-bottom: 40px; text-align: center;">
+                Увеличьте видимость вашей анкеты и привлеките больше клиентов
+            </p>
+
+            <div class="pricing-cards">
+                <!-- Базовый тариф -->
+                <div class="pricing-card">
+                    <div class="pricing-badge">Базовый</div>
+                    <div class="pricing-header">
+                        <h3>Стандарт</h3>
+                        <div class="pricing-price">
+                            <span class="price-amount">2,990</span>
+                            <span class="price-currency">₽</span>
+                            <span class="price-period">/месяц</span>
+                        </div>
+                    </div>
+                    <div class="pricing-features">
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Размещение анкеты</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">До 5 фотографий</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Базовая статистика</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Стандартная поддержка</span>
+                        </div>
+                        <div class="pricing-feature disabled">
+                            <span class="feature-icon">✗</span>
+                            <span class="feature-text">Приоритет в поиске</span>
+                        </div>
+                        <div class="pricing-feature disabled">
+                            <span class="feature-icon">✗</span>
+                            <span class="feature-text">Бейдж "Проверено"</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectPricingPlan('basic', 2990)" style="width: 100%; margin-top: 20px;">
+                        Выбрать тариф
+                    </button>
+                </div>
+
+                <!-- Премиум тариф -->
+                <div class="pricing-card pricing-card-premium">
+                    <div class="pricing-badge pricing-badge-premium">Популярный</div>
+                    <div class="pricing-header">
+                        <h3>Премиум</h3>
+                        <div class="pricing-price">
+                            <span class="price-amount">5,990</span>
+                            <span class="price-currency">₽</span>
+                            <span class="price-period">/месяц</span>
+                        </div>
+                    </div>
+                    <div class="pricing-features">
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Размещение анкеты</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">До 15 фотографий</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Расширенная статистика</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Приоритетная поддержка</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Приоритет в поиске</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Бейдж "Проверено"</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="selectPricingPlan('premium', 5990)" style="width: 100%; margin-top: 20px;">
+                        Выбрать тариф
+                    </button>
+                </div>
+
+                <!-- VIP тариф -->
+                <div class="pricing-card">
+                    <div class="pricing-badge">VIP</div>
+                    <div class="pricing-header">
+                        <h3>Эксклюзив</h3>
+                        <div class="pricing-price">
+                            <span class="price-amount">9,990</span>
+                            <span class="price-currency">₽</span>
+                            <span class="price-period">/месяц</span>
+                        </div>
+                    </div>
+                    <div class="pricing-features">
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Размещение анкеты</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Неограниченно фотографий</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Полная аналитика</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">VIP поддержка 24/7</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Топ позиция в поиске</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Бейдж "VIP Проверено"</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Продвижение в соцсетях</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectPricingPlan('vip', 9990)" style="width: 100%; margin-top: 20px;">
+                        Выбрать тариф
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="src/js/app.js"></script>
 </body>
 </html>
