@@ -784,14 +784,35 @@ function selectPricingPlan(plan, price) {
         'vip': 'Эксклюзив'
     };
 
-    const confirmed = confirm(
-        `Вы выбрали тариф "${planNames[plan]}"\n` +
+    // Проверяем наличие привязанного кошелька
+    const hasWallet = AppState.currentUser && AppState.currentUser.wallet;
+
+    // Формируем сообщение с доступными способами оплаты
+    let paymentMessage = `Вы выбрали тариф "${planNames[plan]}"\n` +
         `Стоимость: ${price.toLocaleString('ru-RU')} ₽/месяц\n\n` +
-        `Для оплаты тарифа свяжитесь с администратором платформы.\n\n` +
-        `Нажмите ОК для активации тарифа (демо-режим)`
-    );
+        `Доступные способы оплаты:\n`;
+
+    if (hasWallet) {
+        paymentMessage += `1. Криптовалюта (${AppState.currentUser.wallet.type})\n`;
+    }
+    paymentMessage += `${hasWallet ? '2' : '1'}. Наличные при личной встрече\n\n`;
+    paymentMessage += `Нажмите ОК для активации тарифа (демо-режим)`;
+
+    const confirmed = confirm(paymentMessage);
 
     if (confirmed) {
+        // Если есть кошелек, спрашиваем способ оплаты
+        let paymentMethod = 'cash'; // По умолчанию наличные
+
+        if (hasWallet) {
+            const useCrypto = confirm(
+                `Выберите способ оплаты:\n\n` +
+                `ОК - Оплата криптовалютой (${AppState.currentUser.wallet.type})\n` +
+                `Отмена - Оплата наличными при встрече`
+            );
+            paymentMethod = useCrypto ? 'crypto' : 'cash';
+        }
+
         // Устанавливаем статус оплаты
         AppState.profilePaymentStatus = plan;
         saveToLocalStorage();
@@ -802,14 +823,26 @@ function selectPricingPlan(plan, price) {
         // Обновляем навигацию для отображения новой кнопки
         updateNavigation();
 
-        // Показываем сообщение об успехе
-        alert(
-            `Тариф "${planNames[plan]}" успешно активирован!\n\n` +
-            `Теперь ваша анкета получит:\n` +
-            (plan === 'basic' ? '- Базовое размещение\n- До 5 фотографий\n- Базовая статистика' : '') +
-            (plan === 'premium' ? '- Приоритетное размещение\n- До 15 фотографий\n- Расширенная статистика\n- Бейдж "Проверено"' : '') +
-            (plan === 'vip' ? '- Топ размещение\n- Неограниченно фотографий\n- Полная аналитика\n- Бейдж "VIP Проверено"\n- Продвижение в соцсетях' : '')
-        );
+        // Формируем сообщение об успехе с информацией о способе оплаты
+        let successMessage = `Тариф "${planNames[plan]}" успешно активирован!\n\n`;
+
+        if (paymentMethod === 'crypto') {
+            successMessage += `Способ оплаты: Криптовалюта (${AppState.currentUser.wallet.type})\n`;
+            successMessage += `Кошелек: ${AppState.currentUser.wallet.address}\n\n`;
+        } else {
+            successMessage += `Способ оплаты: Наличные при личной встрече\n\n`;
+        }
+
+        successMessage += `Ваша анкета получит:\n`;
+        if (plan === 'basic') {
+            successMessage += '- Базовое размещение\n- До 5 фотографий\n- Базовая статистика';
+        } else if (plan === 'premium') {
+            successMessage += '- Приоритетное размещение\n- До 15 фотографий\n- Расширенная статистика\n- Бейдж "Проверено"';
+        } else if (plan === 'vip') {
+            successMessage += '- Топ размещение\n- Неограниченно фотографий\n- Полная аналитика\n- Бейдж "VIP Проверено"\n- Продвижение в соцсетях';
+        }
+
+        alert(successMessage);
     }
 }
 
