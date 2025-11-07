@@ -139,20 +139,30 @@ function updateNavigation() {
 
     // Если в режиме создания/редактирования анкеты
     if (AppState.inModelCreationMode) {
+        // Проверяем наличие созданной анкеты
+        const hasProfile = AppState.currentProfile !== null;
+
+        if (!hasProfile) {
+            // Анкета не создана: показываем только "Главное меню"
+            nav.innerHTML = `
+                <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
+            `;
+            return;
+        }
+
         // Проверяем статус оплаты анкеты
         const isPaid = AppState.profilePaymentStatus !== null;
 
         if (isPaid) {
-            // Оплаченная анкета: показываем "Моя анкета" и "Сменить тариф" слева от "Главное меню"
+            // Тариф куплен: показываем "Сменить тариф" + "Главное меню"
             nav.innerHTML = `
-                <button class="btn btn-outline" onclick="showMyProfileView()">Моя анкета</button>
                 <button class="btn btn-outline" onclick="showPricingModal()">Сменить тариф</button>
                 <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
             `;
         } else {
-            // Неоплаченная анкета: показываем "Оплата анкеты" слева от "Главное меню"
+            // Тариф не куплен: показываем "Оплатить анкету" + "Главное меню"
             nav.innerHTML = `
-                <button class="btn btn-outline" onclick="showPricingModal()">Оплата анкеты</button>
+                <button class="btn btn-outline" onclick="showPricingModal()">Оплатить анкету</button>
                 <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
             `;
         }
@@ -362,6 +372,7 @@ function handleWalletLink(event) {
     event.preventDefault();
 
     const walletType = document.getElementById('walletType').value;
+    const walletNetwork = document.getElementById('walletNetwork').value;
     const walletAddress = document.getElementById('walletAddress').value;
 
     // Если пользователь не авторизован (гость-модель), создаем временного пользователя типа 'model'
@@ -375,6 +386,7 @@ function handleWalletLink(event) {
 
     AppState.currentUser.wallet = {
         type: walletType,
+        network: walletNetwork,
         address: walletAddress
     };
 
@@ -390,24 +402,102 @@ function handleWalletLink(event) {
     showToast('Кошелек успешно привязан!', 'success', 4000);
 }
 
-function updateWalletDisplay(userType) {
-    if (!AppState.currentUser || !AppState.currentUser.wallet) {
-        const walletInfo = document.getElementById(userType === 'model' ? 'modelWalletInfo' : 'clientWalletInfo');
-        if (walletInfo) {
-            walletInfo.innerHTML = '<p class="wallet-status">Кошелек не привязан</p>';
-        }
-        return;
-    }
+function handleWalletUnlink() {
+    showConfirm('Вы уверены, что хотите отвязать кошелек?', () => {
+        if (AppState.currentUser) {
+            AppState.currentUser.wallet = null;
+            saveToLocalStorage();
 
-    const wallet = AppState.currentUser.wallet;
+            if (AppState.currentUser.type === 'model') {
+                updateWalletDisplay('model');
+            } else {
+                updateWalletDisplay('client');
+            }
+
+            showToast('Кошелек успешно отвязан', 'success', 3000);
+        }
+    });
+}
+
+function updateWalletDisplay(userType) {
     const walletInfo = document.getElementById(userType === 'model' ? 'modelWalletInfo' : 'clientWalletInfo');
 
-    if (walletInfo) {
+    if (!walletInfo) return;
+
+    if (!AppState.currentUser || !AppState.currentUser.wallet) {
         walletInfo.innerHTML = `
-            <h3>Кошелек</h3>
-            <p class="wallet-status">Привязан: ${wallet.type}</p>
-            <p class="wallet-address">${wallet.address}</p>
+            <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid var(--border-gray);">
+                <div style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;">💳</div>
+                <h3 style="color: var(--text-gray); font-size: 16px; margin-bottom: 5px;">Кошелек не привязан</h3>
+                <p style="color: var(--text-gray); font-size: 14px; opacity: 0.7;">Привяжите криптокошелек для получения платежей</p>
+            </div>
         `;
+    } else {
+        const wallet = AppState.currentUser.wallet;
+        const shortAddress = wallet.address.substring(0, 8) + '...' + wallet.address.substring(wallet.address.length - 6);
+
+        walletInfo.innerHTML = `
+            <div style="padding: 20px; background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 107, 0, 0.05) 100%); border-radius: 8px; border: 1px solid rgba(255, 107, 0, 0.3);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="font-size: 32px;">✓</div>
+                        <div>
+                            <h3 style="font-size: 18px; color: var(--primary-orange); margin: 0;">Кошелек привязан</h3>
+                            <p style="font-size: 12px; color: var(--text-gray); margin: 5px 0 0 0;">Вы можете получать платежи</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: var(--text-gray); font-size: 13px;">Тип:</span>
+                        <span style="color: var(--text-white); font-weight: 500;">${wallet.type}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: var(--text-gray); font-size: 13px;">Сеть:</span>
+                        <span style="color: var(--text-white); font-weight: 500;">${wallet.network}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--text-gray); font-size: 13px;">Адрес:</span>
+                        <span style="color: var(--text-white); font-family: monospace; font-size: 12px;">${shortAddress}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Обновляем кнопки кошелька
+    updateWalletButtons(userType);
+}
+
+function updateWalletButtons(userType) {
+    const actionsContainer = userType === 'model'
+        ? document.querySelector('#modelInterface .dashboard-actions')
+        : document.querySelector('#clientDashboard .dashboard-actions');
+
+    if (!actionsContainer) return;
+
+    const hasWallet = AppState.currentUser && AppState.currentUser.wallet;
+
+    if (hasWallet) {
+        // Кошелек привязан: показываем кнопку "Отвязать кошелек"
+        actionsContainer.innerHTML = `
+            <button class="btn btn-outline" onclick="handleWalletUnlink()">Отвязать кошелек</button>
+        `;
+    } else {
+        // Кошелек не привязан: показываем кнопку "Привязать криптокошелек"
+        actionsContainer.innerHTML = `
+            <button class="btn btn-outline" onclick="showWalletModal()">Привязать криптокошелек</button>
+        `;
+    }
+
+    // Для клиентов добавляем кнопку "Выход" если она ранее была
+    if (userType === 'client' && AppState.currentUser) {
+        const logoutBtn = actionsContainer.querySelector('button[onclick="logout()"]');
+        if (!logoutBtn) {
+            actionsContainer.innerHTML += `
+                <button class="btn btn-outline" onclick="logout()">Выход</button>
+            `;
+        }
     }
 }
 
@@ -853,6 +943,11 @@ function selectPaymentMethod(method) {
 
 // ==================== ТАРИФЫ ОПЛАТЫ АНКЕТЫ ====================
 function showPricingModal() {
+    // Проверяем, создана ли анкета
+    if (!AppState.currentProfile) {
+        showToast('Сначала создайте анкету, затем выберите тариф для её размещения', 'warning', 5000);
+        return;
+    }
     showModal('pricingModal');
 }
 
