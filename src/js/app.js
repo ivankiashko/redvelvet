@@ -143,15 +143,16 @@ function updateNavigation() {
         const isPaid = AppState.profilePaymentStatus !== null;
 
         if (isPaid) {
-            // Оплаченная анкета: показываем "Моя анкета" слева от "Главное меню"
+            // Оплаченная анкета: показываем "Моя анкета" и "Сменить тариф" слева от "Главное меню"
             nav.innerHTML = `
                 <button class="btn btn-outline" onclick="showMyProfileView()">Моя анкета</button>
+                <button class="btn btn-outline" onclick="showPricingModal()">Сменить тариф</button>
                 <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
             `;
         } else {
-            // Неоплаченная анкета: показываем "Оплатить анкету" слева от "Главное меню"
+            // Неоплаченная анкета: показываем "Оплата анкеты" слева от "Главное меню"
             nav.innerHTML = `
-                <button class="btn btn-outline" onclick="showPricingModal()">Оплатить анкету</button>
+                <button class="btn btn-outline" onclick="showPricingModal()">Оплата анкеты</button>
                 <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
             `;
         }
@@ -160,7 +161,11 @@ function updateNavigation() {
 
     if (!AppState.currentUser) {
         // Гость: показываем Регистрация для клиентов и Создать/Моя анкету для моделей
-        const modelButtonText = AppState.currentProfile ? 'Моя анкета' : 'Создать анкету модели';
+        let modelButtonText = 'Создать анкету модели';
+        if (AppState.currentProfile) {
+            // Если есть профиль, проверяем статус оплаты
+            modelButtonText = AppState.profilePaymentStatus ? 'Моя анкета' : 'Оплата анкеты';
+        }
         nav.innerHTML = `
             <button class="btn btn-outline" onclick="showRegister()">Регистрация клиента</button>
             <button class="btn btn-outline" onclick="showModelInterface()">${modelButtonText}</button>
@@ -172,9 +177,10 @@ function updateNavigation() {
             <button class="btn btn-outline" onclick="logout()">Выход</button>
         `;
     } else if (AppState.currentUser.type === 'model') {
-        // Модель: показываем Моя анкета и Выход
+        // Модель: показываем кнопку в зависимости от статуса оплаты
+        const modelButtonText = AppState.profilePaymentStatus ? 'Моя анкета' : 'Оплата анкеты';
         nav.innerHTML = `
-            <button class="btn btn-outline" onclick="showModelInterface()">Моя анкета</button>
+            <button class="btn btn-outline" onclick="showModelInterface()">${modelButtonText}</button>
             <button class="btn btn-outline" onclick="logout()">Выход</button>
         `;
     }
@@ -358,9 +364,13 @@ function handleWalletLink(event) {
     const walletType = document.getElementById('walletType').value;
     const walletAddress = document.getElementById('walletAddress').value;
 
+    // Если пользователь не авторизован (гость-модель), создаем временного пользователя типа 'model'
     if (!AppState.currentUser) {
-        alert('Необходимо войти в аккаунт');
-        return;
+        AppState.currentUser = {
+            email: `model_${Date.now()}@temporary.local`,
+            type: 'model',
+            wallet: null
+        };
     }
 
     AppState.currentUser.wallet = {
@@ -377,7 +387,7 @@ function handleWalletLink(event) {
         updateWalletDisplay('client');
     }
 
-    alert('Кошелек успешно привязан!');
+    showToast('Кошелек успешно привязан!', 'success', 4000);
 }
 
 function updateWalletDisplay(userType) {
