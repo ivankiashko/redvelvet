@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadFromLocalStorage();
     initializeSampleProfiles(); // Включено для тестирования
     updateNavigation();
-    renderProfiles();
+    showHomeInterface(); // Показываем главную страницу при загрузке
     updateServiceFilter();
 
     // Инициализация фильтров
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Обработчик клика по логотипу
     document.querySelector('.logo').addEventListener('click', () => {
-        showClientInterface();
+        showHomeInterface();
     });
 });
 
@@ -200,11 +200,22 @@ function updateNavigation() {
 function goToMainMenu() {
     AppState.inModelCreationMode = false;
     updateNavigation();
-    showClientInterface();
+    showHomeInterface();
+}
+
+function showHomeInterface() {
+    AppState.inModelCreationMode = false;
+    document.getElementById('homeInterface').classList.remove('hidden');
+    document.getElementById('clientInterface').classList.add('hidden');
+    document.getElementById('clientDashboard').classList.add('hidden');
+    document.getElementById('modelInterface').classList.add('hidden');
+    updateNavigation();
+    renderHomeProfiles();
 }
 
 function showClientInterface() {
     AppState.inModelCreationMode = false;
+    document.getElementById('homeInterface').classList.add('hidden');
     document.getElementById('clientInterface').classList.remove('hidden');
     document.getElementById('clientDashboard').classList.add('hidden');
     document.getElementById('modelInterface').classList.add('hidden');
@@ -214,6 +225,7 @@ function showClientInterface() {
 
 function showClientDashboard() {
     AppState.inModelCreationMode = false;
+    document.getElementById('homeInterface').classList.add('hidden');
     document.getElementById('clientInterface').classList.add('hidden');
     document.getElementById('clientDashboard').classList.remove('hidden');
     document.getElementById('modelInterface').classList.add('hidden');
@@ -223,6 +235,7 @@ function showClientDashboard() {
 
 function showModelInterface() {
     AppState.inModelCreationMode = true;
+    document.getElementById('homeInterface').classList.add('hidden');
     document.getElementById('clientInterface').classList.add('hidden');
     document.getElementById('clientDashboard').classList.add('hidden');
     document.getElementById('modelInterface').classList.remove('hidden');
@@ -323,7 +336,7 @@ function handleRegister(event) {
     saveToLocalStorage();
     closeModal('registerModal');
     updateNavigation();
-    showClientInterface();
+    showHomeInterface();
 
     alert('Регистрация клиента успешна!');
 }
@@ -344,7 +357,7 @@ function handleLogin(event) {
         if (AppState.currentUser.type === 'model') {
             showModelInterface();
         } else {
-            showClientInterface();
+            showHomeInterface();
         }
 
         alert('Вход выполнен успешно!');
@@ -364,7 +377,7 @@ function logout() {
     AppState.profilePaymentStatus = null;
 
     updateNavigation();
-    showClientInterface();
+    showHomeInterface();
 }
 
 // ==================== КОШЕЛЕК ====================
@@ -582,7 +595,7 @@ function saveProfile(event) {
     updateNavigation();
 
     // Переключаемся на главную страницу, чтобы показать анкету в списке
-    showClientInterface();
+    showHomeInterface();
 }
 
 function loadProfileToForm() {
@@ -706,6 +719,26 @@ function removeMedia(index) {
 }
 
 // ==================== ОТОБРАЖЕНИЕ ПРОФИЛЕЙ ====================
+function renderHomeProfiles() {
+    const grid = document.getElementById('homeProfilesGrid');
+    grid.innerHTML = '';
+
+    // Показываем топ-12 анкет с лучшим рейтингом
+    const topProfiles = [...AppState.profiles]
+        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        .slice(0, 12);
+
+    if (topProfiles.length === 0) {
+        grid.innerHTML = '<p class="no-data">Анкеты скоро появятся</p>';
+        return;
+    }
+
+    topProfiles.forEach(profile => {
+        const card = createProfileCard(profile);
+        grid.appendChild(card);
+    });
+}
+
 function renderProfiles() {
     const grid = document.getElementById('profilesGrid');
     grid.innerHTML = '';
