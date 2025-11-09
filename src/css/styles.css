@@ -663,7 +663,7 @@ nav {
 .profile-card {
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
+    border: 2px solid var(--primary-orange);
     border-radius: 20px;
     overflow: hidden;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);

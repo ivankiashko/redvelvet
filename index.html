@@ -23,7 +23,156 @@
             <p style="font-size: 20px; color: var(--text-gray); max-width: 800px; margin: 0 auto;">Премиум платформа эскорт-услуг. Выберите идеальную модель для незабываемой встречи</p>
         </div>
 
-        <h2 style="font-size: 32px; margin-bottom: 30px; text-align: center;">Популярные анкеты</h2>
+        <!-- Поиск и фильтры на главной странице -->
+        <div class="filters">
+            <div class="filters-header-wrapper expanded">
+                <div class="filters-header" onclick="toggleFilters()">
+                    <h3>Поиск и фильтры</h3>
+                </div>
+                <span class="filters-toggle active" onclick="toggleFilters()">▼</span>
+                <!-- Поиск по ключевым словам -->
+                <div class="search-box" id="searchBoxHome">
+                    <input type="text" id="searchKeywordsHome" placeholder="Поиск по имени или ключевым словам..." oninput="applyHomeFilters()">
+                </div>
+            </div>
+            <div class="filters-content active">
+                <!-- Вкладки фильтров -->
+                <div class="filter-tabs">
+                    <div class="filter-tab active" onclick="switchHomeFilterTab('basic')">Основные</div>
+                    <div class="filter-tab" onclick="switchHomeFilterTab('services')">Услуги</div>
+                    <div class="filter-tab" onclick="switchHomeFilterTab('appearance')">Внешность</div>
+                    <div class="filter-tab" onclick="switchHomeFilterTab('params')">Параметры</div>
+                </div>
+
+                <!-- Основные фильтры -->
+                <div class="filter-section active" id="homeBasicFilters">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Возраст от</label>
+                            <input type="number" id="homeFilterAgeFrom" placeholder="18" min="18" oninput="applyHomeFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Возраст до</label>
+                            <input type="number" id="homeFilterAgeTo" placeholder="50" max="99" oninput="applyHomeFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Город</label>
+                            <select id="homeFilterCity" onchange="applyHomeFilters()">
+                                <option value="">Все города</option>
+                                <option value="moscow">Москва</option>
+                                <option value="spb">Санкт-Петербург</option>
+                                <option value="krasnodar">Краснодар</option>
+                                <option value="sochi">Сочи</option>
+                                <option value="ekaterinburg">Екатеринбург</option>
+                                <option value="kazan">Казань</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Рейтинг</label>
+                            <select id="homeFilterRating" onchange="applyHomeFilters()">
+                                <option value="">Любой</option>
+                                <option value="5">5 звезд</option>
+                                <option value="4">4+ звезды</option>
+                                <option value="3">3+ звезды</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Фильтры по внешности -->
+                <div class="filter-section" id="homeAppearanceFilters">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Цвет глаз</label>
+                            <select id="homeFilterEyeColor" onchange="applyHomeFilters()">
+                                <option value="">Любой</option>
+                                <option value="Карие">Карие</option>
+                                <option value="Зеленые">Зеленые</option>
+                                <option value="Голубые">Голубые</option>
+                                <option value="Серые">Серые</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Цвет волос</label>
+                            <select id="homeFilterHairColor" onchange="applyHomeFilters()">
+                                <option value="">Любой</option>
+                                <option value="Блондинка">Блондинка</option>
+                                <option value="Брюнетка">Брюнетка</option>
+                                <option value="Шатенка">Шатенка</option>
+                                <option value="Рыжая">Рыжая</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Национальность</label>
+                            <select id="homeFilterNationality" onchange="applyHomeFilters()">
+                                <option value="">Любая</option>
+                                <option value="Славянка">Славянка</option>
+                                <option value="Азиатка">Азиатка</option>
+                                <option value="Латиноамериканка">Латиноамериканка</option>
+                                <option value="Африканка">Африканка</option>
+                                <option value="Смешанная">Смешанная</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Размер груди</label>
+                            <select id="homeFilterBustSize" onchange="applyHomeFilters()">
+                                <option value="">Любой</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6+">6+</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Фильтры по параметрам -->
+                <div class="filter-section" id="homeParamsFilters">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Рост от (см)</label>
+                            <input type="number" id="homeFilterHeightFrom" placeholder="150" oninput="applyHomeFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Рост до (см)</label>
+                            <input type="number" id="homeFilterHeightTo" placeholder="190" oninput="applyHomeFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Вес от (кг)</label>
+                            <input type="number" id="homeFilterWeightFrom" placeholder="40" oninput="applyHomeFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Вес до (кг)</label>
+                            <input type="number" id="homeFilterWeightTo" placeholder="80" oninput="applyHomeFilters()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Фильтры по услугам -->
+                <div class="filter-section" id="homeServicesFilters">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Цена от (₽/час)</label>
+                            <input type="number" id="homeFilterPriceFrom" placeholder="1000" oninput="applyHomeFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Цена до (₽/час)</label>
+                            <input type="number" id="homeFilterPriceTo" placeholder="50000" oninput="applyHomeFilters()">
+                        </div>
+                        <div class="form-group">
+                            <label>Услуги</label>
+                            <select id="homeFilterServiceType" onchange="applyHomeFilters()">
+                                <option value="">Все услуги</option>
+                                <!-- Опции будут динамически добавлены из доступных услуг -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="profiles-grid" id="homeProfilesGrid">
             <!-- Анкеты будут добавлены через JavaScript -->
         </div>
