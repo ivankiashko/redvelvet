@@ -723,17 +723,14 @@ function renderHomeProfiles() {
     const grid = document.getElementById('homeProfilesGrid');
     grid.innerHTML = '';
 
-    // Показываем топ-12 анкет с лучшим рейтингом
-    const topProfiles = [...AppState.profiles]
-        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-        .slice(0, 12);
+    const filteredProfiles = applyHomeFilters();
 
-    if (topProfiles.length === 0) {
-        grid.innerHTML = '<p class="no-data">Анкеты скоро появятся</p>';
+    if (filteredProfiles.length === 0) {
+        grid.innerHTML = '<p class="no-data">Анкеты не найдены</p>';
         return;
     }
 
-    topProfiles.forEach(profile => {
+    filteredProfiles.forEach(profile => {
         const card = createProfileCard(profile);
         grid.appendChild(card);
     });
@@ -773,7 +770,6 @@ function createProfileCard(profile) {
             ${profile.verified ? '<div class="profile-badge">✓ Проверено</div>' : ''}
         </div>
         <div class="profile-info">
-            <div class="profile-name">${profile.name}</div>
             <div class="profile-age">${profile.age} лет</div>
             <div class="profile-stats">
                 <div class="stat">
@@ -1262,20 +1258,133 @@ function updateServiceFilter() {
         });
     });
 
-    // Обновляем select с услугами
+    // Обновляем select с услугами для клиентского интерфейса
     const serviceSelect = document.getElementById('filterServiceType');
-    const currentValue = serviceSelect.value;
+    if (serviceSelect) {
+        const currentValue = serviceSelect.value;
+        serviceSelect.innerHTML = '<option value="">Все услуги</option>';
+        Array.from(allServices).sort().forEach(service => {
+            const option = document.createElement('option');
+            option.value = service;
+            option.textContent = service;
+            serviceSelect.appendChild(option);
+        });
+        serviceSelect.value = currentValue;
+    }
 
-    serviceSelect.innerHTML = '<option value="">Все услуги</option>';
+    // Обновляем select с услугами для главной страницы
+    const homeServiceSelect = document.getElementById('homeFilterServiceType');
+    if (homeServiceSelect) {
+        const currentValue = homeServiceSelect.value;
+        homeServiceSelect.innerHTML = '<option value="">Все услуги</option>';
+        Array.from(allServices).sort().forEach(service => {
+            const option = document.createElement('option');
+            option.value = service;
+            option.textContent = service;
+            homeServiceSelect.appendChild(option);
+        });
+        homeServiceSelect.value = currentValue;
+    }
+}
 
-    Array.from(allServices).sort().forEach(service => {
-        const option = document.createElement('option');
-        option.value = service;
-        option.textContent = service;
-        serviceSelect.appendChild(option);
+// ==================== ФИЛЬТРАЦИЯ ДЛЯ ГЛАВНОЙ СТРАНИЦЫ ====================
+function switchHomeFilterTab(tabName) {
+    // Обновляем активные вкладки
+    const tabs = document.querySelectorAll('#homeInterface .filter-tab');
+    tabs.forEach(tab => {
+        tab.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    // Показываем соответствующую секцию
+    const sections = document.querySelectorAll('#homeInterface .filter-section');
+    sections.forEach(section => {
+        section.classList.remove('active');
     });
 
-    serviceSelect.value = currentValue;
+    const sectionMap = {
+        'basic': 'homeBasicFilters',
+        'appearance': 'homeAppearanceFilters',
+        'params': 'homeParamsFilters',
+        'services': 'homeServicesFilters'
+    };
+
+    document.getElementById(sectionMap[tabName]).classList.add('active');
+}
+
+function applyHomeFilters() {
+    let filtered = [...AppState.profiles];
+
+    // Поиск по ключевым словам
+    const keywordsInput = document.getElementById('searchKeywordsHome');
+    if (keywordsInput) {
+        const keywords = keywordsInput.value.toLowerCase();
+        if (keywords) {
+            filtered = filtered.filter(p =>
+                p.name.toLowerCase().includes(keywords) ||
+                p.description.toLowerCase().includes(keywords) ||
+                p.services.some(s => s.toLowerCase().includes(keywords))
+            );
+        }
+    }
+
+    // Фильтр по возрасту
+    const ageFrom = document.getElementById('homeFilterAgeFrom').value;
+    const ageTo = document.getElementById('homeFilterAgeTo').value;
+    if (ageFrom) filtered = filtered.filter(p => p.age >= parseInt(ageFrom));
+    if (ageTo) filtered = filtered.filter(p => p.age <= parseInt(ageTo));
+
+    // Фильтр по городу
+    const city = document.getElementById('homeFilterCity').value;
+    if (city) filtered = filtered.filter(p => p.city === city);
+
+    // Фильтр по рейтингу
+    const rating = document.getElementById('homeFilterRating').value;
+    if (rating) filtered = filtered.filter(p => (p.rating || 0) >= parseInt(rating));
+
+    // Фильтр по цвету глаз
+    const eyeColor = document.getElementById('homeFilterEyeColor').value;
+    if (eyeColor) filtered = filtered.filter(p => p.eyeColor === eyeColor);
+
+    // Фильтр по цвету волос
+    const hairColor = document.getElementById('homeFilterHairColor').value;
+    if (hairColor) filtered = filtered.filter(p => p.hairColor === hairColor);
+
+    // Фильтр по национальности
+    const nationality = document.getElementById('homeFilterNationality').value;
+    if (nationality) filtered = filtered.filter(p => p.nationality === nationality);
+
+    // Фильтр по размеру груди
+    const bustSize = document.getElementById('homeFilterBustSize').value;
+    if (bustSize) filtered = filtered.filter(p => p.bustSize === bustSize);
+
+    // Фильтр по росту
+    const heightFrom = document.getElementById('homeFilterHeightFrom').value;
+    const heightTo = document.getElementById('homeFilterHeightTo').value;
+    if (heightFrom) filtered = filtered.filter(p => p.height >= parseInt(heightFrom));
+    if (heightTo) filtered = filtered.filter(p => p.height <= parseInt(heightTo));
+
+    // Фильтр по весу
+    const weightFrom = document.getElementById('homeFilterWeightFrom').value;
+    const weightTo = document.getElementById('homeFilterWeightTo').value;
+    if (weightFrom) filtered = filtered.filter(p => p.weight >= parseInt(weightFrom));
+    if (weightTo) filtered = filtered.filter(p => p.weight <= parseInt(weightTo));
+
+    // Фильтр по цене
+    const priceFrom = document.getElementById('homeFilterPriceFrom').value;
+    const priceTo = document.getElementById('homeFilterPriceTo').value;
+    if (priceFrom) filtered = filtered.filter(p => p.price >= parseInt(priceFrom));
+    if (priceTo) filtered = filtered.filter(p => p.price <= parseInt(priceTo));
+
+    // Фильтр по услугам
+    const serviceType = document.getElementById('homeFilterServiceType').value;
+    if (serviceType) {
+        filtered = filtered.filter(p =>
+            p.services.some(s => s.toLowerCase().includes(serviceType.toLowerCase()))
+        );
+    }
+
+    return filtered;
 }
 
 // ==================== ПРИМЕРЫ АНКЕТ ====================
