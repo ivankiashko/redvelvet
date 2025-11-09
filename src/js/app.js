@@ -770,7 +770,7 @@ function createProfileCard(profile) {
             ${profile.verified ? '<div class="profile-badge">✓ Проверено</div>' : ''}
         </div>
         <div class="profile-info">
-            <div class="profile-age">${profile.age} лет</div>
+            <div class="profile-name">${profile.name}, ${profile.age} лет</div>
             <div class="profile-stats">
                 <div class="stat">
                     <span class="stat-label">Рост</span>

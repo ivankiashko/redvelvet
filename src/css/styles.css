@@ -663,7 +663,7 @@ nav {
 .profile-card {
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
-    border: 2px solid var(--primary-orange);
+    border: none;
     border-radius: 20px;
     overflow: hidden;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -794,7 +794,7 @@ nav {
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 10px;
-    color: var(--text-white);
+    color: var(--primary-orange);
 }
 
 .profile-age {
