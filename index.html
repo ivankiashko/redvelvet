@@ -16,8 +16,21 @@
         </div>
     </header>
 
+    <!-- Главная страница с анкетами (видна всем) -->
+    <div id="homeInterface" class="container">
+        <div class="hero-section" style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(0, 0, 0, 0) 100%); border-radius: 12px; margin-bottom: 40px;">
+            <h1 style="font-size: 48px; margin-bottom: 20px; background: linear-gradient(135deg, var(--primary-orange) 0%, var(--secondary-pink) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">RedVelvet Platform</h1>
+            <p style="font-size: 20px; color: var(--text-gray); max-width: 800px; margin: 0 auto;">Премиум платформа эскорт-услуг. Выберите идеальную модель для незабываемой встречи</p>
+        </div>
+
+        <h2 style="font-size: 32px; margin-bottom: 30px; text-align: center;">Популярные анкеты</h2>
+        <div class="profiles-grid" id="homeProfilesGrid">
+            <!-- Анкеты будут добавлены через JavaScript -->
+        </div>
+    </div>
+
     <!-- Интерфейс для клиентов (просмотр анкет) -->
-    <div id="clientInterface" class="container">
+    <div id="clientInterface" class="container hidden">
         <!-- Поиск и фильтры -->
         <div class="filters">
             <div class="filters-header-wrapper expanded">
