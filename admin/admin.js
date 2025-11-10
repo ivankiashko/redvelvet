@@ -24,7 +24,80 @@
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
 document.addEventListener('DOMContentLoaded', function() {
     updateStatistics();
+    // Автоматически загружаем все данные при открытии админ панели
+    loadProfiles();
+    loadReviews();
 });
+
+// ==================== TOAST УВЕДОМЛЕНИЯ ====================
+function showToast(message, type = 'info', duration = 5000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const titles = {
+        'success': '✓ Успешно',
+        'error': '✗ Ошибка',
+        'info': 'ℹ Информация',
+        'warning': '⚠ Внимание'
+    };
+
+    toast.innerHTML = `
+        <div class="toast-header">${titles[type] || titles['info']}</div>
+        <div class="toast-body">${message}</div>
+        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+    `;
+
+    container.appendChild(toast);
+
+    // Автоматическое удаление через duration
+    setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// ==================== МОДАЛЬНЫЕ ОКНА ПОДТВЕРЖДЕНИЯ ====================
+function showConfirm(message, title = 'Подтверждение') {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirmModal');
+        const titleEl = document.getElementById('confirmTitle');
+        const messageEl = document.getElementById('confirmMessage');
+        const okBtn = document.getElementById('confirmOk');
+        const cancelBtn = document.getElementById('confirmCancel');
+
+        titleEl.textContent = title;
+        messageEl.innerHTML = message.replace(/\n/g, '<br>');
+
+        modal.classList.add('active');
+
+        const handleOk = () => {
+            modal.classList.remove('active');
+            okBtn.removeEventListener('click', handleOk);
+            cancelBtn.removeEventListener('click', handleCancel);
+            modal.removeEventListener('click', handleOutsideClick);
+            resolve(true);
+        };
+
+        const handleCancel = () => {
+            modal.classList.remove('active');
+            okBtn.removeEventListener('click', handleOk);
+            cancelBtn.removeEventListener('click', handleCancel);
+            modal.removeEventListener('click', handleOutsideClick);
+            resolve(false);
+        };
+
+        const handleOutsideClick = (e) => {
+            if (e.target === modal) {
+                handleCancel();
+            }
+        };
+
+        okBtn.addEventListener('click', handleOk);
+        cancelBtn.addEventListener('click', handleCancel);
+        modal.addEventListener('click', handleOutsideClick);
+    });
+}
 
 // ==================== ЗАГРУЗКА ДАННЫХ ====================
 function loadFromLocalStorage() {
@@ -100,8 +173,51 @@ function loadProfiles() {
     });
 }
 
+async function deleteAllProfiles() {
+    const confirmed1 = await showConfirm(
+        'Вы уверены, что хотите удалить ВСЕ анкеты?<br><br><strong style="color: #ff9500;">Это действие нельзя отменить!</strong>',
+        '⚠️ Удаление всех анкет'
+    );
+
+    if (confirmed1) {
+        const confirmed2 = await showConfirm(
+            'Подтвердите еще раз: удалить все анкеты и отзывы?',
+            '⚠️ Последнее предупреждение'
+        );
+
+        if (confirmed2) {
+            localStorage.setItem('redvelvet_profiles', JSON.stringify([]));
+            localStorage.setItem('redvelvet_reviews', JSON.stringify({}));
+
+            loadProfiles();
+            loadReviews();
+            updateStatistics();
+            showToast('Все анкеты и отзывы успешно удалены!', 'success', 4000);
+        }
+    }
+}
+
+async function clearAllData() {
+    const confirmed1 = await showConfirm(
+        '<strong style="color: #ff3b30;">ВНИМАНИЕ!</strong><br><br>Это удалит <strong>ВСЕ</strong> данные платформы:<br>• Все анкеты<br>• Все отзывы<br>• Всех пользователей<br>• Все настройки<br><br>Продолжить?',
+        '🚨 Опасная операция'
+    );
+
+    if (confirmed1) {
+        const confirmed2 = await showConfirm(
+            'Последнее подтверждение:<br><br><strong style="color: #ff3b30;">Удалить все данные?</strong><br><br>Страница будет перезагружена.',
+            '🚨 Последнее предупреждение'
+        );
+
+        if (confirmed2) {
+            localStorage.clear();
+            showToast('Все данные успешно удалены! Перезагрузка...', 'success', 2000);
+            setTimeout(() => location.reload(), 2000);
+        }
+    }
+}
+
 function approveProfile(profileId) {
-    // TODO: Реализовать верификацию анкеты
     const data = loadFromLocalStorage();
     const profile = data.profiles.find(p => p.id === profileId);
 
@@ -110,20 +226,32 @@ function approveProfile(profileId) {
         localStorage.setItem('redvelvet_profiles', JSON.stringify(data.profiles));
         loadProfiles();
         updateStatistics();
-        alert('Анкета успешно одобрена!');
+        showToast(`Анкета "${profile.name}" успешно одобрена!`, 'success', 4000);
     }
 }
 
-function rejectProfile(profileId) {
-    if (confirm('Вы уверены, что хотите отклонить эту анкету?')) {
+async function rejectProfile(profileId) {
+    const confirmed = await showConfirm(
+        'Вы уверены, что хотите отклонить эту анкету?<br><br>Анкета будет удалена.',
+        '⚠️ Отклонение анкеты'
+    );
+
+    if (confirmed) {
         // TODO: В будущем добавить систему уведомлений модели о причине отклонения
         deleteProfile(profileId);
     }
 }
 
-function deleteProfile(profileId) {
-    if (confirm('Вы уверены, что хотите удалить эту анкету? Это действие нельзя отменить.')) {
-        const data = loadFromLocalStorage();
+async function deleteProfile(profileId) {
+    const data = loadFromLocalStorage();
+    const profile = data.profiles.find(p => p.id === profileId);
+
+    const confirmed = await showConfirm(
+        `Вы уверены, что хотите удалить анкету "<strong>${profile ? profile.name : 'Unknown'}</strong>"?<br><br><strong style="color: #ff9500;">Это действие нельзя отменить.</strong>`,
+        '⚠️ Удаление анкеты'
+    );
+
+    if (confirmed) {
         const updatedProfiles = data.profiles.filter(p => p.id !== profileId);
 
         localStorage.setItem('redvelvet_profiles', JSON.stringify(updatedProfiles));
@@ -136,7 +264,7 @@ function deleteProfile(profileId) {
 
         loadProfiles();
         updateStatistics();
-        alert('Анкета успешно удалена!');
+        showToast('Анкета успешно удалена!', 'success', 3000);
     }
 }
 
@@ -189,8 +317,13 @@ function loadReviews() {
     });
 }
 
-function deleteReview(profileId, reviewIndex) {
-    if (confirm('Вы уверены, что хотите удалить этот отзыв?')) {
+async function deleteReview(profileId, reviewIndex) {
+    const confirmed = await showConfirm(
+        'Вы уверены, что хотите удалить этот отзыв?<br><br>Рейтинг анкеты будет пересчитан.',
+        '⚠️ Удаление отзыва'
+    );
+
+    if (confirmed) {
         const data = loadFromLocalStorage();
 
         if (data.reviews[profileId] && data.reviews[profileId][reviewIndex]) {
@@ -216,7 +349,7 @@ function deleteReview(profileId, reviewIndex) {
 
             loadReviews();
             updateStatistics();
-            alert('Отзыв успешно удален!');
+            showToast('Отзыв успешно удален!', 'success', 3000);
         }
     }
 }
@@ -241,7 +374,7 @@ function exportData(type) {
             filename = 'users_export.json';
             break;
         default:
-            alert('Неизвестный тип данных');
+            showToast('Неизвестный тип данных', 'error', 3000);
             return;
     }
 
@@ -253,7 +386,7 @@ function exportData(type) {
     link.download = filename;
     link.click();
 
-    alert('Данные успешно экспортированы!');
+    showToast(`Данные успешно экспортированы в файл ${filename}`, 'success', 4000);
 }
 
 // ==================== УТИЛИТЫ ====================
@@ -270,9 +403,16 @@ function getCityName(cityCode) {
     return cities[cityCode] || cityCode;
 }
 
-function logout() {
-    if (confirm('Вы уверены, что хотите выйти?')) {
-        // TODO: В будущем добавить реальную аутентификацию
-        window.location.href = '../index.html';
+async function logout() {
+    const confirmed = await showConfirm(
+        'Вы уверены, что хотите выйти из админ панели?',
+        '👋 Выход'
+    );
+
+    if (confirmed) {
+        showToast('Выход из админ панели...', 'info', 2000);
+        setTimeout(() => {
+            window.location.href = '../index.html';
+        }, 2000);
     }
 }
