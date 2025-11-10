@@ -106,6 +106,21 @@
         </div>
     </div>
 
+    <!-- Toast контейнер -->
+    <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px;"></div>
+
+    <!-- Модальное окно подтверждения -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 id="confirmTitle">Подтверждение</h2>
+            <p id="confirmMessage" style="color: var(--text-gray); line-height: 1.6; margin: 20px 0;"></p>
+            <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                <button class="btn btn-outline" id="confirmCancel">Отмена</button>
+                <button class="btn btn-primary" id="confirmOk">ОК</button>
+            </div>
+        </div>
+    </div>
+
     <script src="admin.js"></script>
 </body>
 </html>
