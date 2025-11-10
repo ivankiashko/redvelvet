@@ -24,6 +24,9 @@
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
 document.addEventListener('DOMContentLoaded', function() {
     updateStatistics();
+    // Автоматически загружаем все данные при открытии админ панели
+    loadProfiles();
+    loadReviews();
 });
 
 // ==================== ЗАГРУЗКА ДАННЫХ ====================
@@ -98,6 +101,30 @@ function loadProfiles() {
 
         list.appendChild(item);
     });
+}
+
+function deleteAllProfiles() {
+    if (confirm('Вы уверены, что хотите удалить ВСЕ анкеты? Это действие нельзя отменить!')) {
+        if (confirm('Подтвердите еще раз: удалить все анкеты и отзывы?')) {
+            localStorage.setItem('redvelvet_profiles', JSON.stringify([]));
+            localStorage.setItem('redvelvet_reviews', JSON.stringify({}));
+
+            loadProfiles();
+            loadReviews();
+            updateStatistics();
+            alert('Все анкеты и отзывы успешно удалены!');
+        }
+    }
+}
+
+function clearAllData() {
+    if (confirm('ВНИМАНИЕ! Это удалит ВСЕ данные платформы (анкеты, отзывы, пользователей). Продолжить?')) {
+        if (confirm('Последнее подтверждение: удалить все данные?')) {
+            localStorage.clear();
+            alert('Все данные успешно удалены! Страница будет перезагружена.');
+            location.reload();
+        }
+    }
 }
 
 function approveProfile(profileId) {

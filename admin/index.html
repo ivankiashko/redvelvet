@@ -48,11 +48,12 @@
             <div class="admin-section">
                 <h2>Управление анкетами</h2>
                 <div class="admin-controls">
-                    <button class="btn btn-outline" onclick="loadProfiles()">Загрузить анкеты</button>
+                    <button class="btn btn-outline" onclick="loadProfiles()">Обновить список</button>
                     <button class="btn btn-outline" onclick="exportData('profiles')">Экспорт данных</button>
+                    <button class="btn btn-outline" style="background: rgba(255, 59, 48, 0.1); border-color: rgba(255, 59, 48, 0.3); color: #ff3b30;" onclick="deleteAllProfiles()">Удалить все анкеты</button>
                 </div>
                 <div id="profilesList" class="admin-list">
-                    <p class="no-data">Нажмите "Загрузить анкеты" для просмотра</p>
+                    <p class="no-data">Загрузка...</p>
                 </div>
             </div>
 
@@ -72,11 +73,11 @@
             <div class="admin-section">
                 <h2>Управление отзывами</h2>
                 <div class="admin-controls">
-                    <button class="btn btn-outline" onclick="loadReviews()">Загрузить отзывы</button>
+                    <button class="btn btn-outline" onclick="loadReviews()">Обновить список</button>
                     <button class="btn btn-outline" onclick="exportData('reviews')">Экспорт данных</button>
                 </div>
                 <div id="reviewsList" class="admin-list">
-                    <p class="no-data">Нажмите "Загрузить отзывы" для просмотра</p>
+                    <p class="no-data">Загрузка...</p>
                 </div>
             </div>
 
@@ -89,6 +90,17 @@
                 </p>
                 <div id="transactionsList" class="admin-list">
                     <p class="no-data">Функционал в разработке</p>
+                </div>
+            </div>
+
+            <!-- Опасная зона -->
+            <div class="admin-section" style="border: 2px solid rgba(255, 59, 48, 0.3); background: rgba(255, 59, 48, 0.05);">
+                <h2 style="color: #ff3b30;">Опасная зона</h2>
+                <p class="info-text" style="color: #ff9500;">
+                    <strong>ВНИМАНИЕ!</strong> Действия в этой зоне необратимы и удалят все данные платформы.
+                </p>
+                <div class="admin-controls">
+                    <button class="btn btn-outline" style="background: rgba(255, 59, 48, 0.2); border-color: rgba(255, 59, 48, 0.5); color: #ff3b30; font-weight: bold;" onclick="clearAllData()">Удалить ВСЕ данные</button>
                 </div>
             </div>
         </div>
