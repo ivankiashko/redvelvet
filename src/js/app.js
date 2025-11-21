@@ -16,7 +16,6 @@ const AppState = {
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
 document.addEventListener('DOMContentLoaded', function() {
     loadFromLocalStorage();
-    initializeSampleProfiles(); // Включено для тестирования
     updateNavigation();
     showHomeInterface(); // Показываем главную страницу при загрузке
     updateServiceFilter();
@@ -1566,83 +1565,3 @@ function applyHomeFilters() {
     return filtered;
 }
 
-// ==================== ПРИМЕРЫ АНКЕТ ====================
-function initializeSampleProfiles() {
-    // Добавляем тестовую анкету девушки из Москвы, если её еще нет
-    const testProfileId = 'test-moscow-girl-001';
-    const existingProfile = AppState.profiles.find(p => p.id === testProfileId);
-
-    if (!existingProfile) {
-        const testProfile = {
-            id: testProfileId,
-            name: 'Виктория',
-            age: 22,
-            city: 'Москва',
-            height: 169,
-            weight: 51,
-            bustSize: 4,
-            eyeColor: 'Карие',
-            hairColor: 'Брюнетка',
-            nationality: 'Славянка',
-            bodyType: 'Модельная',
-            clothingSize: 'S (42-44)',
-            description: 'Привет! Меня зовут Виктория, мне 22 года. Я утонченная девушка с модельной внешностью и приятным характером. Люблю интересное общение, романтические встречи и новые впечатления. Гарантирую полную конфиденциальность и незабываемое времяпрепровождение. Встречаюсь только с интеллигентными и щедрыми мужчинами. Встречи только на моей территории или в отелях.',
-            services: [
-                'Классический секс',
-                'Минет в презервативе',
-                'Минет без презерватива',
-                'Массаж классический',
-                'Поцелуи',
-                'Куннилингус',
-                'Расслабляющий массаж',
-                'Легкий БДСМ',
-                'Ролевые игры'
-            ],
-            price: 8000,
-            phone: '+7 (916) 555-12-34',
-            images: [
-                {
-                    type: 'image/jpeg',
-                    data: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iI0ZGNkIzNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjI0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+VmlrdG9yaWE8L3RleHQ+PC9zdmc+',
-                    name: 'photo1.jpg'
-                },
-                {
-                    type: 'image/jpeg',
-                    data: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iI0ZGOEMyQSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjI0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+UGhvdG8gMjwvdGV4dD48L3N2Zz4=',
-                    name: 'photo2.jpg'
-                },
-                {
-                    type: 'image/jpeg',
-                    data: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iI0ZGQTcwQSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjI0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+UGhvdG8gMzwvdGV4dD48L3N2Zz4=',
-                    name: 'photo3.jpg'
-                }
-            ],
-            videos: [],
-            rating: 4.8,
-            reviewCount: 1,
-            views: 156,
-            verified: true,
-            plan: 'premium',
-            createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // 7 дней назад
-        };
-
-        // Добавляем анкету
-        AppState.profiles.push(testProfile);
-
-        // Добавляем тестовый отзыв
-        if (!AppState.reviews[testProfileId]) {
-            AppState.reviews[testProfileId] = [];
-        }
-
-        AppState.reviews[testProfileId].push({
-            id: 'review-test-001',
-            profileId: testProfileId,
-            author: 'Дмитрий',
-            rating: 5,
-            text: 'Отличная девушка! Очень приятная в общении, красивая и ухоженная. Встреча прошла на высшем уровне, все как договаривались. Обязательно встретимся снова. Рекомендую!',
-            date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 дня назад
-        });
-
-        saveToLocalStorage();
-    }
-}

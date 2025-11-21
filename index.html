@@ -34,8 +34,8 @@
                 <span class="filters-toggle active" onclick="toggleFilters()">▼</span>
                 <!-- Поиск по ключевым словам -->
                 <div class="search-box" id="searchBoxHome">
-                    <span class="search-icon">🔍</span>
                     <input type="text" id="searchKeywordsHome" placeholder="Поиск по имени или ключевым словам..." oninput="applyHomeFilters()">
+                    <button class="btn btn-outline search-button" onclick="applyHomeFilters()">Поиск</button>
                 </div>
             </div>
             <div class="filters-content active">
@@ -192,8 +192,8 @@
                 <span class="filters-toggle active" onclick="toggleFilters()">▼</span>
                 <!-- Поиск по ключевым словам -->
                 <div class="search-box" id="searchBoxMain">
-                    <span class="search-icon">🔍</span>
                     <input type="text" id="searchKeywords" placeholder="Поиск по имени или ключевым словам..." oninput="applyFilters()">
+                    <button class="btn btn-outline search-button" onclick="applyFilters()">Поиск</button>
                 </div>
             </div>
             <div class="filters-content active">
