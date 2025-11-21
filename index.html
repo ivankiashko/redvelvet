@@ -34,6 +34,7 @@
                 <span class="filters-toggle active" onclick="toggleFilters()">▼</span>
                 <!-- Поиск по ключевым словам -->
                 <div class="search-box" id="searchBoxHome">
+                    <span class="search-icon">🔍</span>
                     <input type="text" id="searchKeywordsHome" placeholder="Поиск по имени или ключевым словам..." oninput="applyHomeFilters()">
                 </div>
             </div>
@@ -191,6 +192,7 @@
                 <span class="filters-toggle active" onclick="toggleFilters()">▼</span>
                 <!-- Поиск по ключевым словам -->
                 <div class="search-box" id="searchBoxMain">
+                    <span class="search-icon">🔍</span>
                     <input type="text" id="searchKeywords" placeholder="Поиск по имени или ключевым словам..." oninput="applyFilters()">
                 </div>
             </div>
@@ -807,14 +809,15 @@
                     <div class="toggle-group">
                         <div class="toggle-group-title">Медиа контент</div>
                         <div class="form-group">
-                            <label>Фото и видео</label>
+                            <label>Фото (обязательно ровно 3 фотографии) *</label>
                         <div class="file-upload" onclick="document.getElementById('mediaUpload').click()">
                             <div class="upload-icon">📷</div>
-                            <p>Нажмите для загрузки фото или видео</p>
+                            <p>Нажмите для загрузки фото</p>
                             <p style="font-size: 12px; color: var(--text-gray); margin-top: 10px;">
-                                Поддерживаются: JPG, PNG, MP4 (макс. 10 МБ)
+                                Обязательно: ровно 3 фотографии<br>
+                                Поддерживаются: JPG, PNG (макс. 10 МБ каждое)
                             </p>
-                            <input type="file" id="mediaUpload" multiple accept="image/*,video/*" onchange="handleMediaUpload(event)">
+                            <input type="file" id="mediaUpload" multiple accept="image/*" onchange="handleMediaUpload(event)">
                         </div>
                             <div class="media-preview" id="mediaPreview"></div>
                         </div>
@@ -914,7 +917,7 @@
                 </div>
                 <div class="form-group">
                     <label>Номер телефона для звонков *</label>
-                    <input type="tel" id="modelRegisterPhone" required placeholder="+7 (___) ___-__-__">
+                    <input type="tel" id="modelRegisterPhone" required placeholder="+7 (___) ___-__-__" oninput="autoFormatPhoneInput(this)">
                     <p style="font-size: 12px; color: var(--text-gray); margin-top: 5px;">
                         Номер будет показан клиенту при выборе оплаты по договоренности
                     </p>
@@ -1075,7 +1078,7 @@
                     <div class="pricing-header">
                         <h3>Стандарт</h3>
                         <div class="pricing-price">
-                            <span class="price-amount">299</span>
+                            <span class="price-amount">2 990</span>
                             <span class="price-currency">₽</span>
                             <span class="price-period">/месяц</span>
                         </div>
@@ -1084,10 +1087,6 @@
                         <div class="pricing-feature">
                             <span class="feature-icon">✓</span>
                             <span class="feature-text">Размещение анкеты</span>
-                        </div>
-                        <div class="pricing-feature">
-                            <span class="feature-icon">✓</span>
-                            <span class="feature-text">До 5 фотографий</span>
                         </div>
                         <div class="pricing-feature">
                             <span class="feature-icon">✓</span>
@@ -1107,21 +1106,25 @@
                         </div>
                         <div class="pricing-feature disabled">
                             <span class="feature-icon">✗</span>
+                            <span class="feature-text">Расширенная статистика</span>
+                        </div>
+                        <div class="pricing-feature disabled">
+                            <span class="feature-icon">✗</span>
                             <span class="feature-text">Продвижение в соцсетях</span>
                         </div>
                     </div>
-                    <button class="btn btn-outline" onclick="selectPricingPlan('basic', 299)" style="width: 100%; margin-top: auto;">
+                    <button class="btn btn-outline" onclick="selectPricingPlan('basic', 2990)" style="width: 100%; margin-top: auto;">
                         Выбрать тариф
                     </button>
                 </div>
 
                 <!-- Премиум тариф -->
                 <div class="pricing-card pricing-card-premium">
-                    <div class="pricing-badge pricing-badge-premium">Популярный</div>
+                    <div class="pricing-badge pricing-badge-premium">Популярный ✓</div>
                     <div class="pricing-header">
                         <h3>Премиум</h3>
                         <div class="pricing-price">
-                            <span class="price-amount">599</span>
+                            <span class="price-amount">5 990</span>
                             <span class="price-currency">₽</span>
                             <span class="price-period">/месяц</span>
                         </div>
@@ -1133,11 +1136,7 @@
                         </div>
                         <div class="pricing-feature">
                             <span class="feature-icon">✓</span>
-                            <span class="feature-text">До 15 фотографий</span>
-                        </div>
-                        <div class="pricing-feature">
-                            <span class="feature-icon">✓</span>
-                            <span class="feature-text">Расширенная статистика</span>
+                            <span class="feature-text">Расширенная статистика просмотров</span>
                         </div>
                         <div class="pricing-feature">
                             <span class="feature-icon">✓</span>
@@ -1145,29 +1144,33 @@
                         </div>
                         <div class="pricing-feature">
                             <span class="feature-icon">✓</span>
-                            <span class="feature-text">Приоритет в поиске</span>
+                            <span class="feature-text">Средний приоритет в поиске</span>
                         </div>
                         <div class="pricing-feature">
                             <span class="feature-icon">✓</span>
                             <span class="feature-text">Бейдж "Проверено"</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
+                            <span class="feature-text">Аналитика переходов</span>
                         </div>
                         <div class="pricing-feature disabled">
                             <span class="feature-icon">✗</span>
                             <span class="feature-text">Продвижение в соцсетях</span>
                         </div>
                     </div>
-                    <button class="btn btn-primary" onclick="selectPricingPlan('premium', 599)" style="width: 100%; margin-top: auto;">
+                    <button class="btn btn-primary" onclick="selectPricingPlan('premium', 5990)" style="width: 100%; margin-top: auto;">
                         Выбрать тариф
                     </button>
                 </div>
 
                 <!-- VIP тариф -->
                 <div class="pricing-card">
-                    <div class="pricing-badge">VIP</div>
+                    <div class="pricing-badge">Эксклюзив ✓</div>
                     <div class="pricing-header">
                         <h3>Эксклюзив</h3>
                         <div class="pricing-price">
-                            <span class="price-amount">999</span>
+                            <span class="price-amount">9 990</span>
                             <span class="price-currency">₽</span>
                             <span class="price-period">/месяц</span>
                         </div>
@@ -1179,11 +1182,7 @@
                         </div>
                         <div class="pricing-feature">
                             <span class="feature-icon">✓</span>
-                            <span class="feature-text">Неограниченно фотографий</span>
-                        </div>
-                        <div class="pricing-feature">
-                            <span class="feature-icon">✓</span>
-                            <span class="feature-text">Полная аналитика</span>
+                            <span class="feature-text">Полная аналитика и статистика</span>
                         </div>
                         <div class="pricing-feature">
                             <span class="feature-icon">✓</span>
@@ -1199,14 +1198,38 @@
                         </div>
                         <div class="pricing-feature">
                             <span class="feature-icon">✓</span>
+                            <span class="feature-text">Детальная аналитика переходов</span>
+                        </div>
+                        <div class="pricing-feature">
+                            <span class="feature-icon">✓</span>
                             <span class="feature-text">Продвижение в соцсетях</span>
                         </div>
                     </div>
-                    <button class="btn btn-outline" onclick="selectPricingPlan('vip', 999)" style="width: 100%; margin-top: auto;">
+                    <button class="btn btn-outline" onclick="selectPricingPlan('vip', 9990)" style="width: 100%; margin-top: auto;">
                         Выбрать тариф
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно с номером телефона при оплате по договоренности -->
+    <div id="phoneCallModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; text-align: center;">
+            <button class="modal-close" onclick="closeModal('phoneCallModal')">&times;</button>
+            <div style="font-size: 64px; margin-bottom: 20px;">📞</div>
+            <h2 style="margin-bottom: 20px;">Позвоните для договоренности</h2>
+            <p style="color: var(--text-gray); margin-bottom: 30px; font-size: 16px;">
+                Для обсуждения условий и бронирования, пожалуйста, свяжитесь по указанному номеру
+            </p>
+            <div id="phoneNumberDisplay" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 107, 53, 0.1)); border: 2px solid var(--primary-orange); border-radius: 15px; padding: 30px; margin-bottom: 30px;">
+                <p style="color: var(--text-gray); font-size: 14px; margin-bottom: 10px;">Номер телефона</p>
+                <a id="phoneNumberLink" href="tel:" style="font-size: 32px; font-weight: 700; color: var(--primary-orange); text-decoration: none; display: block; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255, 107, 53, 0.6);">+7 (___) ___-__-__</a>
+                <p id="modelNameDisplay" style="color: var(--text-gray); font-size: 16px; margin-top: 10px;"></p>
+            </div>
+            <button class="btn btn-outline" onclick="closeModal('phoneCallModal')" style="width: 100%;">
+                Закрыть
+            </button>
         </div>
     </div>
 
