@@ -416,3 +416,92 @@ async function logout() {
         }, 2000);
     }
 }
+
+// ==================== БЫСТРОЕ СОЗДАНИЕ АНКЕТ ====================
+function showQuickCreateModal() {
+    document.getElementById('quickCreateModal').classList.add('active');
+}
+
+function closeQuickCreateModal() {
+    document.getElementById('quickCreateModal').classList.remove('active');
+}
+
+function handleQuickCreate(event) {
+    event.preventDefault();
+
+    const name = document.getElementById('quickName').value;
+    const age = parseInt(document.getElementById('quickAge').value);
+    const city = document.getElementById('quickCity').value;
+    const description = document.getElementById('quickDescription').value;
+
+    // Случайные параметры внешности
+    const heights = [160, 165, 168, 170, 172, 175, 178, 180];
+    const weights = [50, 52, 55, 58, 60, 62, 65];
+    const bustSizes = ['1', '2', '3', '4', '5'];
+    const eyeColors = ['Карие', 'Голубые', 'Зеленые', 'Серые'];
+    const hairColors = ['Блондинка', 'Брюнетка', 'Шатенка', 'Рыжая'];
+    const nationalities = ['Славянка', 'Азиатка', 'Латиноамериканка', 'Мулатка'];
+    const bodyTypes = ['Стройная', 'Спортивная', 'Аппетитная', 'Пышные формы'];
+    const clothingSizes = ['XS', 'S', 'M', 'L'];
+
+    // Все возможные услуги
+    const allServices = [
+        'Классический секс', 'Секс без презерватива', 'Анальный секс', 'Анальный фистинг',
+        'Минет без презерватива', 'Минет глубокий', 'Окончание в рот', 'Куннилингус',
+        'БДСМ', 'Госпожа', 'Подчинение', 'Страпон', 'Фетиш', 'Золотой дождь',
+        'Ролевые игры', 'Эротический массаж', 'Массаж простаты', 'Лесби-шоу',
+        'Групповой секс', 'ЖМЖ', 'Стриптиз', 'Эскорт', 'Выезд в отель', 'Услуги для пар'
+    ];
+
+    // Выбираем случайные 8-15 услуг
+    const servicesCount = Math.floor(Math.random() * 8) + 8;
+    const shuffled = allServices.sort(() => 0.5 - Math.random());
+    const selectedServices = shuffled.slice(0, servicesCount);
+
+    // Генерируем случайный номер телефона
+    const randomPhone = `+7 (${Math.floor(Math.random() * 900) + 100}) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 90) + 10}-${Math.floor(Math.random() * 90) + 10}`;
+
+    // Создаем анкету
+    const data = loadFromLocalStorage();
+
+    const newProfile = {
+        id: Date.now(),
+        name,
+        age,
+        city,
+        height: heights[Math.floor(Math.random() * heights.length)],
+        weight: weights[Math.floor(Math.random() * weights.length)],
+        bustSize: bustSizes[Math.floor(Math.random() * bustSizes.length)],
+        eyeColor: eyeColors[Math.floor(Math.random() * eyeColors.length)],
+        hairColor: hairColors[Math.floor(Math.random() * hairColors.length)],
+        nationality: nationalities[Math.floor(Math.random() * nationalities.length)],
+        bodyType: bodyTypes[Math.floor(Math.random() * bodyTypes.length)],
+        clothingSize: clothingSizes[Math.floor(Math.random() * clothingSizes.length)],
+        description,
+        services: selectedServices,
+        price: (Math.floor(Math.random() * 10) + 5) * 1000, // От 5000 до 15000
+        phone: randomPhone,
+        images: [],
+        videos: [],
+        rating: 0,
+        reviewCount: 0,
+        views: 0,
+        verified: true, // Сразу одобренная для теста
+        createdAt: new Date().toISOString()
+    };
+
+    data.profiles.push(newProfile);
+    localStorage.setItem('redvelvet_profiles', JSON.stringify(data.profiles));
+
+    closeQuickCreateModal();
+    loadProfiles();
+    updateStatistics();
+
+    showToast(`Анкета "${name}" успешно создана!\n\nНомер телефона: ${randomPhone}\nУслуги: ${selectedServices.length} шт.`, 'success', 6000);
+
+    // Очищаем форму
+    document.getElementById('quickName').value = '';
+    document.getElementById('quickAge').value = '';
+    document.getElementById('quickCity').value = '';
+    document.getElementById('quickDescription').value = '';
+}
