@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Удаление анкеты - RedVelvet</title>
+</head>
+<body>
+    <h1>Удаление сохраненной анкеты...</h1>
+    <p>Анкета будет удалена при следующей загрузке главной страницы.</p>
+    <script>
+        // Устанавливаем флаг для удаления анкеты
+        localStorage.setItem('redvelvet_delete_profile_flag', 'true');
+
+        // Показываем сообщение и перенаправляем
+        alert('Флаг удаления анкеты установлен. Сейчас вы будете перенаправлены на главную страницу, где анкета будет автоматически удалена.');
+
+        // Перенаправление на главную страницу через 1 секунду
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
+    </script>
+</body>
+</html>

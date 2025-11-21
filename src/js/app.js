@@ -16,6 +16,32 @@ const AppState = {
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
 document.addEventListener('DOMContentLoaded', function() {
     loadFromLocalStorage();
+
+    // Автоматическое удаление сохраненной анкеты (одноразово)
+    // Проверяем флаг для удаления анкеты
+    const shouldDeleteProfile = localStorage.getItem('redvelvet_delete_profile_flag');
+    if (shouldDeleteProfile === 'true') {
+        // Удаляем анкету без подтверждения
+        if (AppState.currentProfile) {
+            const index = AppState.profiles.findIndex(p => p.id === AppState.currentProfile.id);
+            if (index !== -1) {
+                AppState.profiles.splice(index, 1);
+            }
+            if (AppState.reviews[AppState.currentProfile.id]) {
+                delete AppState.reviews[AppState.currentProfile.id];
+            }
+            AppState.currentProfile = null;
+            AppState.mediaFiles = [];
+            AppState.profilePaymentStatus = null;
+            localStorage.removeItem('redvelvet_profile');
+            localStorage.removeItem('redvelvet_payment_status');
+            saveToLocalStorage();
+            showToast('Сохраненная анкета была удалена', 'success', 3000);
+        }
+        // Удаляем флаг после выполнения
+        localStorage.removeItem('redvelvet_delete_profile_flag');
+    }
+
     updateNavigation();
     showHomeInterface(); // Показываем главную страницу при загрузке
     updateServiceFilter();
@@ -539,6 +565,41 @@ function logout() {
         updateNavigation();
         showHomeInterface();
         showToast('Вы вышли из аккаунта', 'info', 3000);
+    });
+}
+
+// Функция для удаления сохраненной анкеты
+function deleteCurrentProfile() {
+    showConfirm('Вы уверены, что хотите удалить свою анкету? Это действие необратимо.', () => {
+        if (AppState.currentProfile) {
+            // Удаляем анкету из списка всех профилей
+            const index = AppState.profiles.findIndex(p => p.id === AppState.currentProfile.id);
+            if (index !== -1) {
+                AppState.profiles.splice(index, 1);
+            }
+
+            // Удаляем отзывы к анкете
+            if (AppState.reviews[AppState.currentProfile.id]) {
+                delete AppState.reviews[AppState.currentProfile.id];
+            }
+
+            // Очищаем текущий профиль
+            AppState.currentProfile = null;
+            AppState.mediaFiles = [];
+            AppState.profilePaymentStatus = null;
+
+            // Удаляем из localStorage
+            localStorage.removeItem('redvelvet_profile');
+            localStorage.removeItem('redvelvet_payment_status');
+            saveToLocalStorage();
+
+            // Обновляем интерфейс
+            updateNavigation();
+            showHomeInterface();
+            showToast('Анкета успешно удалена', 'success', 3000);
+        } else {
+            showToast('Нет анкеты для удаления', 'info', 3000);
+        }
     });
 }
 
@@ -1423,7 +1484,6 @@ function applyFilters() {
         );
     }
 
-    renderProfiles();
     return filtered;
 }
 
