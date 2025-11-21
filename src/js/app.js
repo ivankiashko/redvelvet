@@ -143,9 +143,10 @@ function updateNavigation() {
         const hasProfile = AppState.currentProfile !== null;
 
         if (!hasProfile) {
-            // Анкета не создана: показываем только "Главное меню"
+            // Анкета не создана: показываем только "Главное меню" и "Выход"
             nav.innerHTML = `
                 <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
+                ${AppState.currentUser ? '<button class="btn btn-outline" onclick="logout()">Выход</button>' : ''}
             `;
             return;
         }
@@ -154,31 +155,28 @@ function updateNavigation() {
         const isPaid = AppState.profilePaymentStatus !== null;
 
         if (isPaid) {
-            // Тариф куплен: показываем "Сменить тариф" + "Главное меню"
+            // Тариф куплен: показываем "Сменить тариф" + "Главное меню" + "Выход"
             nav.innerHTML = `
                 <button class="btn btn-outline" onclick="showPricingModal()">Сменить тариф</button>
                 <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
+                <button class="btn btn-outline" onclick="logout()">Выход</button>
             `;
         } else {
-            // Тариф не куплен: показываем "Оплатить анкету" + "Главное меню"
+            // Тариф не куплен: показываем "Оплатить анкету" + "Главное меню" + "Выход"
             nav.innerHTML = `
                 <button class="btn btn-outline" onclick="showPricingModal()">Оплатить анкету</button>
                 <button class="btn btn-outline" onclick="goToMainMenu()">Главное меню</button>
+                ${AppState.currentUser ? '<button class="btn btn-outline" onclick="logout()">Выход</button>' : ''}
             `;
         }
         return;
     }
 
     if (!AppState.currentUser) {
-        // Гость: показываем Регистрация для клиентов и Создать/Моя анкету для моделей
-        let modelButtonText = 'Создать анкету модели';
-        if (AppState.currentProfile) {
-            // Если есть профиль, проверяем статус оплаты
-            modelButtonText = AppState.profilePaymentStatus ? 'Моя анкета' : 'Оплата анкеты';
-        }
+        // Гость: показываем раздельные кнопки входа для клиентов и моделей
         nav.innerHTML = `
-            <button class="btn btn-outline" onclick="showRegister()">Регистрация клиента</button>
-            <button class="btn btn-outline" onclick="showModelInterface()">${modelButtonText}</button>
+            <button class="btn btn-outline" onclick="showRegister()">Вход клиента</button>
+            <button class="btn btn-outline" onclick="showModelRegister()">Вход модели</button>
         `;
     } else if (AppState.currentUser.type === 'client') {
         // Клиент: показываем Мой профиль и Выход
@@ -187,8 +185,11 @@ function updateNavigation() {
             <button class="btn btn-outline" onclick="logout()">Выход</button>
         `;
     } else if (AppState.currentUser.type === 'model') {
-        // Модель: показываем кнопку в зависимости от статуса оплаты
-        const modelButtonText = AppState.profilePaymentStatus ? 'Моя анкета' : 'Оплата анкеты';
+        // Модель: показываем кнопку в зависимости от статуса анкеты
+        const hasProfile = AppState.currentProfile !== null;
+        const modelButtonText = hasProfile
+            ? (AppState.profilePaymentStatus ? 'Моя анкета' : 'Моя анкета (не оплачена)')
+            : 'Создать анкету';
         nav.innerHTML = `
             <button class="btn btn-outline" onclick="showModelInterface()">${modelButtonText}</button>
             <button class="btn btn-outline" onclick="logout()">Выход</button>
@@ -308,6 +309,13 @@ function showLogin() {
     showModal('loginModal');
 }
 
+function showModelRegister() {
+    showModal('modelRegisterModal');
+}
+
+function showModelLogin() {
+    showModal('modelLoginModal');
+}
 
 function showWalletModal() {
     showModal('walletModal');
@@ -322,13 +330,14 @@ function handleRegister(event) {
     const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
 
     if (password !== passwordConfirm) {
-        alert('Пароли не совпадают');
+        showToast('Пароли не совпадают', 'error', 4000);
         return;
     }
 
     // Регистрация только для клиентов
     AppState.currentUser = {
         email: email,
+        password: password,
         type: 'client',
         wallet: null
     };
@@ -338,7 +347,7 @@ function handleRegister(event) {
     updateNavigation();
     showHomeInterface();
 
-    alert('Регистрация клиента успешна!');
+    showToast('Регистрация клиента успешна!', 'success', 4000);
 }
 
 function handleLogin(event) {
@@ -347,37 +356,93 @@ function handleLogin(event) {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
-    // TODO: Временное решение - просто загружаем сохраненного пользователя
+    // Проверяем сохраненного пользователя
     const savedUser = localStorage.getItem('redvelvet_user');
     if (savedUser) {
-        AppState.currentUser = JSON.parse(savedUser);
-        closeModal('loginModal');
-        updateNavigation();
-
-        if (AppState.currentUser.type === 'model') {
-            showModelInterface();
-        } else {
+        const user = JSON.parse(savedUser);
+        if (user.email === email && user.password === password && user.type === 'client') {
+            AppState.currentUser = user;
+            closeModal('loginModal');
+            updateNavigation();
             showHomeInterface();
+            showToast('Вход выполнен успешно!', 'success', 3000);
+        } else {
+            showToast('Неверный email или пароль', 'error', 4000);
         }
-
-        alert('Вход выполнен успешно!');
     } else {
-        alert('Пользователь не найден. Пожалуйста, зарегистрируйтесь.');
+        showToast('Пользователь не найден. Пожалуйста, зарегистрируйтесь.', 'error', 4000);
+    }
+}
+
+function handleModelRegister(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('modelRegisterEmail').value;
+    const phone = document.getElementById('modelRegisterPhone').value;
+    const password = document.getElementById('modelRegisterPassword').value;
+    const passwordConfirm = document.getElementById('modelRegisterPasswordConfirm').value;
+
+    if (password !== passwordConfirm) {
+        showToast('Пароли не совпадают', 'error', 4000);
+        return;
+    }
+
+    // Создаем аккаунт модели
+    AppState.currentUser = {
+        email: email,
+        phone: phone,
+        password: password, // В реальном приложении пароль должен быть захеширован
+        type: 'model',
+        wallet: null
+    };
+
+    saveToLocalStorage();
+    closeModal('modelRegisterModal');
+    updateNavigation();
+    showModelInterface();
+
+    showToast('Регистрация модели успешна! Теперь создайте свою анкету.', 'success', 5000);
+}
+
+function handleModelLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('modelLoginEmail').value;
+    const password = document.getElementById('modelLoginPassword').value;
+
+    // Проверяем сохраненного пользователя
+    const savedUser = localStorage.getItem('redvelvet_user');
+    if (savedUser) {
+        const user = JSON.parse(savedUser);
+        if (user.email === email && user.password === password && user.type === 'model') {
+            AppState.currentUser = user;
+            closeModal('modelLoginModal');
+            updateNavigation();
+            showModelInterface();
+            showToast('Добро пожаловать!', 'success', 3000);
+        } else {
+            showToast('Неверный email или пароль', 'error', 4000);
+        }
+    } else {
+        showToast('Пользователь не найден. Пожалуйста, зарегистрируйтесь.', 'error', 4000);
     }
 }
 
 function logout() {
-    // Сохраняем профили и отзывы, но удаляем пользователя
-    localStorage.removeItem('redvelvet_user');
-    localStorage.removeItem('redvelvet_profile');
-    localStorage.removeItem('redvelvet_payment_status');
-    AppState.currentUser = null;
-    AppState.currentProfile = null;
-    AppState.mediaFiles = [];
-    AppState.profilePaymentStatus = null;
+    showConfirm('Вы уверены, что хотите выйти из аккаунта?', () => {
+        // Сохраняем профили и отзывы, но удаляем пользователя
+        localStorage.removeItem('redvelvet_user');
+        localStorage.removeItem('redvelvet_profile');
+        localStorage.removeItem('redvelvet_payment_status');
+        AppState.currentUser = null;
+        AppState.currentProfile = null;
+        AppState.mediaFiles = [];
+        AppState.profilePaymentStatus = null;
 
-    updateNavigation();
-    showHomeInterface();
+        updateNavigation();
+        showHomeInterface();
+        showToast('Вы вышли из аккаунта', 'info', 3000);
+    });
 }
 
 // ==================== КОШЕЛЕК ====================
@@ -546,9 +611,12 @@ function saveProfile(event) {
     const services = [...new Set(servicesArray)];
 
     if (services.length === 0) {
-        alert('Выберите хотя бы одну услугу');
+        showToast('Выберите хотя бы одну услугу', 'warning', 4000);
         return;
     }
+
+    // Получаем номер телефона из аккаунта модели
+    const phone = AppState.currentUser && AppState.currentUser.phone ? AppState.currentUser.phone : '';
 
     const profileData = {
         id: AppState.currentProfile ? AppState.currentProfile.id : Date.now(),
@@ -566,12 +634,13 @@ function saveProfile(event) {
         description,
         services,
         price,
+        phone, // Добавляем номер телефона модели
         images: AppState.mediaFiles.filter(f => f.type.startsWith('image')),
         videos: AppState.mediaFiles.filter(f => f.type.startsWith('video')),
         rating: AppState.currentProfile ? AppState.currentProfile.rating : 0,
         reviewCount: AppState.currentProfile ? AppState.currentProfile.reviewCount : 0,
         views: AppState.currentProfile ? AppState.currentProfile.views : 0,
-        verified: true, // Автоматическое подтверждение для тестирования
+        verified: false, // Теперь требуется модерация админом
         createdAt: AppState.currentProfile ? AppState.currentProfile.createdAt : new Date().toISOString()
     };
 
@@ -591,7 +660,7 @@ function saveProfile(event) {
     updateServiceFilter();
     renderProfiles(); // Обновляем список профилей
 
-    alert('Анкета успешно сохранена! Теперь она отображается на главной странице.');
+    showToast('Анкета успешно сохранена! Она будет опубликована после модерации админом.', 'success', 5000);
     updateNavigation();
 
     // Переключаемся на главную страницу, чтобы показать анкету в списке
@@ -672,7 +741,7 @@ function handleMediaUpload(event) {
 
     files.forEach(file => {
         if (file.size > 10 * 1024 * 1024) {
-            alert(`Файл ${file.name} превышает максимальный размер 10 МБ`);
+            showToast(`Файл ${file.name} превышает максимальный размер 10 МБ`, 'error', 4000);
             return;
         }
 
@@ -952,19 +1021,33 @@ function showPaymentModal() {
 function selectPaymentMethod(method) {
     closeModal('paymentModal');
 
+    const profile = AppState.profiles.find(p => p.id === AppState.currentProfileView);
+    if (!profile) return;
+
     if (method === 'crypto') {
-        if (!AppState.currentUser) {
-            alert('Для оплаты криптовалютой необходимо войти в аккаунт');
-            showLogin();
-            return;
-        }
-
-        const profile = AppState.profiles.find(p => p.id === AppState.currentProfileView);
-        if (!profile) return;
-
-        alert(`Оплата криптовалютой для ${profile.name}\n\nИнструкция:\n1. Перейдите в свой криптокошелек\n2. Отправьте ${profile.price} USDT на адрес модели\n3. Свяжитесь с моделью для подтверждения`);
+        // Показываем предупреждение о том, что функция в разработке
+        showToast(
+            'Функция оплаты криптокошельком находится в разработке.\n\nПожалуйста, выберите оплату по договоренности.',
+            'warning',
+            6000
+        );
+        showModal('paymentModal');
+        return;
     } else {
-        alert('Свяжитесь с моделью для обсуждения условий оплаты по договоренности');
+        // Оплата по договоренности - показываем номер телефона
+        if (profile.phone) {
+            showToast(
+                `Для оплаты по договоренности позвоните по номеру:\n\n${profile.phone}\n\n(${profile.name})`,
+                'info',
+                8000
+            );
+        } else {
+            showToast(
+                'Номер телефона не указан в анкете.\n\nСвяжитесь с моделью через другие способы связи.',
+                'warning',
+                5000
+            );
+        }
     }
 
     showModal('profileModal');
@@ -1060,7 +1143,7 @@ function showMyProfileView() {
 // ==================== ОТЗЫВЫ ====================
 function openReviewModal() {
     if (!AppState.currentUser) {
-        alert('Для того чтобы оставить отзыв, необходимо войти в аккаунт');
+        showToast('Для того чтобы оставить отзыв, необходимо войти в аккаунт', 'warning', 5000);
         closeModal('profileModal');
         showLogin();
         return;
@@ -1095,12 +1178,12 @@ function handleReviewSubmit(event) {
     event.preventDefault();
 
     if (!AppState.currentUser) {
-        alert('Необходимо войти в аккаунт');
+        showToast('Необходимо войти в аккаунт', 'warning', 4000);
         return;
     }
 
     if (AppState.selectedReviewRating === 0) {
-        alert('Пожалуйста, выберите оценку');
+        showToast('Пожалуйста, выберите оценку', 'warning', 4000);
         return;
     }
 
@@ -1131,7 +1214,7 @@ function handleReviewSubmit(event) {
     saveToLocalStorage();
     closeModal('reviewModal');
 
-    alert('Отзыв успешно добавлен!');
+    showToast('Отзыв успешно добавлен!', 'success', 4000);
 
     openProfileModal(AppState.currentProfileView);
 }
@@ -1389,64 +1472,6 @@ function applyHomeFilters() {
 
 // ==================== ПРИМЕРЫ АНКЕТ ====================
 function initializeSampleProfiles() {
-    // Проверяем, есть ли уже профили в системе
-    // Если есть хотя бы один профиль, не добавляем тестовые
-    if (AppState.profiles.length > 0) return;
-
-    // Одна тестовая анкета для демонстрации
-    const sampleProfiles = [
-        {
-            id: 1,
-            name: 'Вероника',
-            age: 27,
-            city: 'kazan',
-            height: 173,
-            weight: 58,
-            bustSize: '4',
-            eyeColor: 'Зеленые',
-            hairColor: 'Шатенка',
-            nationality: 'Славянка',
-            bodyType: 'Аппетитная',
-            clothingSize: 'M',
-            description: 'Страстная и раскрепощенная. Обожаю анальный секс и эксперименты. Без табу и ограничений. Для тех, кто ищет по-настоящему горячую встречу.',
-            services: ['Классический секс', 'Секс без презерватива', 'Анальный секс', 'Анальный фистинг', 'Минет без презерватива', 'Минет глубокий', 'Окончание в рот', 'Куннилингус', 'БДСМ', 'Подчинение', 'Страпон', 'Фетиш', 'Золотой дождь', 'Ролевые игры', 'Эротический массаж', 'Массаж простаты', 'Лесби-шоу', 'Групповой секс', 'ЖМЖ', 'Стриптиз', 'Эскорт', 'Выезд в отель', 'Услуги для пар'],
-            price: 10000,
-            images: [],
-            videos: [],
-            rating: 4.8,
-            reviewCount: 3,
-            views: 45,
-            verified: true,
-            createdAt: new Date('2024-09-08').toISOString()
-        }
-    ];
-
-    // Добавляем тестовую анкету
-    AppState.profiles = [...AppState.profiles, ...sampleProfiles];
-
-    // Добавляем примеры отзывов для одной анкеты
-    AppState.reviews = {
-        1: [
-            {
-                rating: 5,
-                text: 'Прекрасная девушка! Очень приятное общение, красивая и умная. Рекомендую!',
-                date: new Date('2024-10-28').toISOString(),
-                userId: 'client1@example.com'
-            },
-            {
-                rating: 5,
-                text: 'Всё на высшем уровне. Настоящий профессионал своего дела.',
-                date: new Date('2024-10-26').toISOString(),
-                userId: 'client2@example.com'
-            },
-            {
-                rating: 4,
-                text: 'Отличная встреча, все понравилось. Спасибо!',
-                date: new Date('2024-10-22').toISOString(),
-                userId: 'client3@example.com'
-            }
-        ]
-    };
-
-    saveToLocalStorage();
+    // Функция больше не добавляет тестовые анкеты
+    // Все анкеты создаются пользователями или через админ-панель
 }

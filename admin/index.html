@@ -49,6 +49,7 @@
                 <h2>Управление анкетами</h2>
                 <div class="admin-controls">
                     <button class="btn btn-outline" onclick="loadProfiles()">Обновить список</button>
+                    <button class="btn btn-primary" onclick="showQuickCreateModal()">Быстрое создание анкеты</button>
                     <button class="btn btn-outline" onclick="exportData('profiles')">Экспорт данных</button>
                     <button class="btn btn-outline" style="background: rgba(255, 59, 48, 0.1); border-color: rgba(255, 59, 48, 0.3); color: #ff3b30;" onclick="deleteAllProfiles()">Удалить все анкеты</button>
                 </div>
@@ -118,6 +119,47 @@
                 <button class="btn btn-outline" id="confirmCancel">Отмена</button>
                 <button class="btn btn-primary" id="confirmOk">ОК</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно быстрого создания анкеты -->
+    <div id="quickCreateModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="modal-close" onclick="closeQuickCreateModal()">&times;</button>
+            <h2>Быстрое создание тестовой анкеты</h2>
+            <p style="color: var(--text-gray); margin-bottom: 20px;">
+                Создайте анкету с случайными услугами и номером телефона для тестирования
+            </p>
+            <form onsubmit="handleQuickCreate(event)">
+                <div class="form-group">
+                    <label>Имя *</label>
+                    <input type="text" id="quickName" required placeholder="Например: Анастасия">
+                </div>
+                <div class="form-group">
+                    <label>Возраст *</label>
+                    <input type="number" id="quickAge" min="18" max="99" required placeholder="Например: 25">
+                </div>
+                <div class="form-group">
+                    <label>Город *</label>
+                    <select id="quickCity" required>
+                        <option value="">Выберите город</option>
+                        <option value="moscow">Москва</option>
+                        <option value="spb">Санкт-Петербург</option>
+                        <option value="krasnodar">Краснодар</option>
+                        <option value="sochi">Сочи</option>
+                        <option value="ekaterinburg">Екатеринбург</option>
+                        <option value="kazan">Казань</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Описание *</label>
+                    <textarea id="quickDescription" rows="3" required placeholder="Краткое описание модели..."></textarea>
+                </div>
+                <p style="color: var(--text-gray); font-size: 14px; margin: 20px 0;">
+                    ℹ️ Параметры внешности, услуги и номер телефона будут сгенерированы случайно
+                </p>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Создать анкету</button>
+            </form>
         </div>
     </div>
 
