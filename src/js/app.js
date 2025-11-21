@@ -31,7 +31,33 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('.logo').addEventListener('click', () => {
         showHomeInterface();
     });
+
+    // Запускаем искусственную накрутку просмотров
+    startViewsBoost();
 });
+
+// ==================== ИСКУССТВЕННАЯ НАКРУТКА ПРОСМОТРОВ ====================
+function startViewsBoost() {
+    // Увеличиваем просмотры каждые 10-30 секунд случайным образом
+    setInterval(() => {
+        if (AppState.profiles.length === 0) return;
+
+        // Выбираем случайную анкету
+        const randomIndex = Math.floor(Math.random() * AppState.profiles.length);
+        const profile = AppState.profiles[randomIndex];
+
+        // Увеличиваем просмотры на случайное число от 1 до 5
+        const viewsIncrease = Math.floor(Math.random() * 5) + 1;
+        profile.views = (profile.views || 0) + viewsIncrease;
+
+        saveToLocalStorage();
+
+        // Обновляем статистику если это профиль текущей модели
+        if (AppState.currentProfile && AppState.currentProfile.id === profile.id) {
+            updateModelStats();
+        }
+    }, Math.random() * 20000 + 10000); // Каждые 10-30 секунд
+}
 
 // ==================== ЗАГРУЗКА И СОХРАНЕНИЕ ДАННЫХ ====================
 function loadFromLocalStorage() {
@@ -284,6 +310,46 @@ function updateModelStats() {
     const sortedProfiles = [...AppState.profiles].sort((a, b) => (b.rating || 0) - (a.rating || 0));
     const rank = sortedProfiles.findIndex(p => p.id === profile.id) + 1;
     document.getElementById('rankPosition').textContent = rank > 0 ? rank : '-';
+
+    // Расширенная статистика для премиум и эксклюзив тарифов
+    const plan = AppState.profilePaymentStatus;
+    const dashboardStats = document.querySelector('.dashboard-stats');
+
+    if ((plan === 'premium' || plan === 'vip') && dashboardStats) {
+        // Добавляем дополнительные карточки статистики
+        const existingExtendedStats = document.querySelectorAll('.extended-stat-card');
+        if (existingExtendedStats.length === 0) {
+            const extendedStatsHTML = `
+                <div class="stat-card extended-stat-card" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 107, 53, 0.05)); border: 1px solid rgba(255, 107, 53, 0.3);">
+                    <div class="stat-card-value">${Math.floor((profile.views || 0) * 0.3)}</div>
+                    <div class="stat-card-label">Переходы по контактам</div>
+                </div>
+                ${plan === 'vip' ? `
+                <div class="stat-card extended-stat-card" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 107, 53, 0.05)); border: 1px solid rgba(255, 107, 53, 0.3);">
+                    <div class="stat-card-value">${Math.floor((profile.views || 0) * 0.15)}</div>
+                    <div class="stat-card-label">Запросы бронирования</div>
+                </div>
+                <div class="stat-card extended-stat-card" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 107, 53, 0.05)); border: 1px solid rgba(255, 107, 53, 0.3);">
+                    <div class="stat-card-value">${Math.floor((profile.views || 0) * 0.45)}%</div>
+                    <div class="stat-card-label">Конверсия просмотров</div>
+                </div>
+                ` : ''}
+            `;
+            dashboardStats.insertAdjacentHTML('beforeend', extendedStatsHTML);
+        } else {
+            // Обновляем существующую расширенную статистику
+            const contactsCard = existingExtendedStats[0]?.querySelector('.stat-card-value');
+            if (contactsCard) contactsCard.textContent = Math.floor((profile.views || 0) * 0.3);
+
+            if (plan === 'vip' && existingExtendedStats.length >= 3) {
+                const bookingsCard = existingExtendedStats[1]?.querySelector('.stat-card-value');
+                if (bookingsCard) bookingsCard.textContent = Math.floor((profile.views || 0) * 0.15);
+
+                const conversionCard = existingExtendedStats[2]?.querySelector('.stat-card-value');
+                if (conversionCard) conversionCard.textContent = Math.floor((profile.views || 0) * 0.45) + '%';
+            }
+        }
+    }
 }
 
 // ==================== МОДАЛЬНЫЕ ОКНА ====================
@@ -374,11 +440,40 @@ function handleLogin(event) {
     }
 }
 
+// Функция форматирования номера телефона
+function formatPhoneNumber(phoneNumber) {
+    // Удаляем все нечисловые символы
+    const cleaned = phoneNumber.replace(/\D/g, '');
+
+    // Если номер начинается с 8, заменяем на 7
+    let formatted = cleaned.startsWith('8') ? '7' + cleaned.slice(1) : cleaned;
+
+    // Форматируем в формат +7 (XXX) XXX-XX-XX
+    if (formatted.length >= 11) {
+        formatted = formatted.slice(0, 11);
+        return `+7 (${formatted.slice(1, 4)}) ${formatted.slice(4, 7)}-${formatted.slice(7, 9)}-${formatted.slice(9, 11)}`;
+    } else if (formatted.length >= 7) {
+        return `+7 (${formatted.slice(1, 4)}) ${formatted.slice(4, 7)}-${formatted.slice(7)}`;
+    } else if (formatted.length >= 4) {
+        return `+7 (${formatted.slice(1, 4)}) ${formatted.slice(4)}`;
+    } else if (formatted.length >= 1) {
+        return `+7 (${formatted.slice(1)}`;
+    }
+
+    return '+7';
+}
+
+// Автоматическое форматирование номера телефона при вводе
+function autoFormatPhoneInput(input) {
+    const formatted = formatPhoneNumber(input.value);
+    input.value = formatted;
+}
+
 function handleModelRegister(event) {
     event.preventDefault();
 
     const email = document.getElementById('modelRegisterEmail').value;
-    const phone = document.getElementById('modelRegisterPhone').value;
+    const phoneInput = document.getElementById('modelRegisterPhone').value;
     const password = document.getElementById('modelRegisterPassword').value;
     const passwordConfirm = document.getElementById('modelRegisterPasswordConfirm').value;
 
@@ -386,6 +481,9 @@ function handleModelRegister(event) {
         showToast('Пароли не совпадают', 'error', 4000);
         return;
     }
+
+    // Форматируем номер телефона
+    const phone = formatPhoneNumber(phoneInput);
 
     // Создаем аккаунт модели
     AppState.currentUser = {
@@ -615,6 +713,13 @@ function saveProfile(event) {
         return;
     }
 
+    // Проверяем количество загруженных фото
+    const imagesCount = AppState.mediaFiles.filter(f => f.type.startsWith('image')).length;
+    if (imagesCount !== 3) {
+        showToast(`Необходимо загрузить ровно 3 фотографии. Сейчас загружено: ${imagesCount}`, 'warning', 5000);
+        return;
+    }
+
     // Получаем номер телефона из аккаунта модели
     const phone = AppState.currentUser && AppState.currentUser.phone ? AppState.currentUser.phone : '';
 
@@ -644,27 +749,29 @@ function saveProfile(event) {
         createdAt: AppState.currentProfile ? AppState.currentProfile.createdAt : new Date().toISOString()
     };
 
-    if (AppState.currentProfile) {
-        // Обновляем существующую анкету
+    // Сохраняем данные анкеты временно
+    AppState.currentProfile = profileData;
+
+    // Проверяем, есть ли уже оплаченный тариф
+    if (AppState.profilePaymentStatus) {
+        // Тариф уже оплачен, обновляем анкету в списке
         const index = AppState.profiles.findIndex(p => p.id === AppState.currentProfile.id);
         if (index !== -1) {
             AppState.profiles[index] = profileData;
+        } else {
+            AppState.profiles.push(profileData);
         }
+        saveToLocalStorage();
+        updateServiceFilter();
+        renderProfiles();
+        showToast('Анкета успешно обновлена!', 'success', 4000);
+        updateNavigation();
     } else {
-        // Создаем новую анкету
-        AppState.profiles.push(profileData);
+        // Тариф не оплачен - показываем окно выбора тарифа
+        saveToLocalStorage();
+        showToast('Анкета сохранена. Выберите тариф для публикации.', 'info', 4000);
+        showPricingModal();
     }
-
-    AppState.currentProfile = profileData;
-    saveToLocalStorage();
-    updateServiceFilter();
-    renderProfiles(); // Обновляем список профилей
-
-    showToast('Анкета успешно сохранена! Она будет опубликована после модерации админом.', 'success', 5000);
-    updateNavigation();
-
-    // Переключаемся на главную страницу, чтобы показать анкету в списке
-    showHomeInterface();
 }
 
 function loadProfileToForm() {
@@ -739,9 +846,26 @@ function clearProfileForm() {
 function handleMediaUpload(event) {
     const files = Array.from(event.target.files);
 
+    // Подсчитываем текущее количество изображений
+    const currentImagesCount = AppState.mediaFiles.filter(f => f.type.startsWith('image')).length;
+
     files.forEach(file => {
+        // Проверяем максимальный размер
         if (file.size > 10 * 1024 * 1024) {
             showToast(`Файл ${file.name} превышает максимальный размер 10 МБ`, 'error', 4000);
+            return;
+        }
+
+        // Проверяем, что файл является изображением
+        if (!file.type.startsWith('image')) {
+            showToast(`Можно загружать только изображения. Видео не поддерживаются.`, 'warning', 4000);
+            return;
+        }
+
+        // Проверяем лимит в 3 фото
+        const imagesInQueue = AppState.mediaFiles.filter(f => f.type.startsWith('image')).length;
+        if (imagesInQueue >= 3) {
+            showToast('Максимальное количество фото: 3. Удалите существующие, чтобы загрузить новые.', 'warning', 5000);
             return;
         }
 
@@ -1035,22 +1159,21 @@ function selectPaymentMethod(method) {
         return;
     } else {
         // Оплата по договоренности - показываем номер телефона
+        closeModal('profileModal');
         if (profile.phone) {
-            showToast(
-                `Для оплаты по договоренности позвоните по номеру:\n\n${profile.phone}\n\n(${profile.name})`,
-                'info',
-                8000
-            );
+            document.getElementById('phoneNumberLink').textContent = profile.phone;
+            document.getElementById('phoneNumberLink').href = 'tel:' + profile.phone.replace(/\D/g, '');
+            document.getElementById('modelNameDisplay').textContent = profile.name;
+            showModal('phoneCallModal');
         } else {
             showToast(
                 'Номер телефона не указан в анкете.\n\nСвяжитесь с моделью через другие способы связи.',
                 'warning',
                 5000
             );
+            showModal('profileModal');
         }
     }
-
-    showModal('profileModal');
 }
 
 // ==================== ТАРИФЫ ОПЛАТЫ АНКЕТЫ ====================
@@ -1064,69 +1187,42 @@ function showPricingModal() {
 }
 
 function selectPricingPlan(plan, price) {
-    // Подтверждение выбора тарифа
+    if (!AppState.currentProfile) {
+        showToast('Сначала создайте анкету', 'warning', 4000);
+        return;
+    }
+
+    AppState.profilePaymentStatus = plan;
+
+    // Публикуем анкету в списке после выбора тарифа
+    const index = AppState.profiles.findIndex(p => p.id === AppState.currentProfile.id);
+    if (index !== -1) {
+        AppState.profiles[index] = AppState.currentProfile;
+    } else {
+        AppState.profiles.push(AppState.currentProfile);
+    }
+
+    saveToLocalStorage();
+    updateServiceFilter();
+    renderProfiles();
+
+    closeModal('pricingModal');
+
+    // Показываем сообщение о выбранном тарифе
     const planNames = {
         'basic': 'Стандарт',
         'premium': 'Премиум',
         'vip': 'Эксклюзив'
     };
 
-    // Проверяем наличие привязанного кошелька
-    const hasWallet = AppState.currentUser && AppState.currentUser.wallet;
+    showToast(
+        `Тариф "${planNames[plan]}" выбран!\n\nВаша анкета опубликована и находится на проверке.\n\nМенеджер свяжется с вами для подтверждения оплаты.\n\nЦена: ${price} ₽/месяц`,
+        'success',
+        8000
+    );
 
-    // Формируем сообщение с доступными способами оплаты
-    let paymentMessage = `Вы выбрали тариф "${planNames[plan]}"\nСтоимость: ${price.toLocaleString('ru-RU')} ₽/месяц\n\nДоступные способы оплаты:\n`;
-
-    if (hasWallet) {
-        paymentMessage += `1. Криптовалюта (${AppState.currentUser.wallet.type})\n`;
-    }
-    paymentMessage += `${hasWallet ? '2' : '1'}. Наличные при личной встрече\n\nНажмите ОК для активации тарифа (демо-режим)`;
-
-    showConfirm(paymentMessage, () => {
-        // Функция после подтверждения
-        const processPayment = (paymentMethod) => {
-            // Устанавливаем статус оплаты
-            AppState.profilePaymentStatus = plan;
-            saveToLocalStorage();
-
-            // Закрываем модальное окно
-            closeModal('pricingModal');
-
-            // Обновляем навигацию для отображения новой кнопки
-            updateNavigation();
-
-            // Формируем сообщение об успехе с информацией о способе оплаты
-            let successMessage = `Тариф "${planNames[plan]}" успешно активирован!\n\n`;
-
-            if (paymentMethod === 'crypto') {
-                successMessage += `Способ оплаты: Криптовалюта (${AppState.currentUser.wallet.type})\nКошелек: ${AppState.currentUser.wallet.address}\n\n`;
-            } else {
-                successMessage += `Способ оплаты: Наличные при личной встрече\n\n`;
-            }
-
-            successMessage += `Ваша анкета получит:\n`;
-            if (plan === 'basic') {
-                successMessage += '- Базовое размещение\n- До 5 фотографий\n- Базовая статистика';
-            } else if (plan === 'premium') {
-                successMessage += '- Приоритетное размещение\n- До 15 фотографий\n- Расширенная статистика\n- Бейдж "Проверено"';
-            } else if (plan === 'vip') {
-                successMessage += '- Топ размещение\n- Неограниченно фотографий\n- Полная аналитика\n- Бейдж "VIP Проверено"\n- Продвижение в соцсетях';
-            }
-
-            showToast(successMessage, 'success', 7000);
-        };
-
-        // Если есть кошелек, спрашиваем способ оплаты
-        if (hasWallet) {
-            showConfirm(
-                `Выберите способ оплаты:\n\nОК - Оплата криптовалютой (${AppState.currentUser.wallet.type})\nОтмена - Оплата наличными при встрече`,
-                () => processPayment('crypto'),
-                () => processPayment('cash')
-            );
-        } else {
-            processPayment('cash');
-        }
-    });
+    // Перенаправляем на главную страницу
+    showHomeInterface();
 }
 
 function showMyProfileView() {
@@ -1472,6 +1568,81 @@ function applyHomeFilters() {
 
 // ==================== ПРИМЕРЫ АНКЕТ ====================
 function initializeSampleProfiles() {
-    // Функция больше не добавляет тестовые анкеты
-    // Все анкеты создаются пользователями или через админ-панель
+    // Добавляем тестовую анкету девушки из Москвы, если её еще нет
+    const testProfileId = 'test-moscow-girl-001';
+    const existingProfile = AppState.profiles.find(p => p.id === testProfileId);
+
+    if (!existingProfile) {
+        const testProfile = {
+            id: testProfileId,
+            name: 'Виктория',
+            age: 22,
+            city: 'Москва',
+            height: 169,
+            weight: 51,
+            bustSize: 4,
+            eyeColor: 'Карие',
+            hairColor: 'Брюнетка',
+            nationality: 'Славянка',
+            bodyType: 'Модельная',
+            clothingSize: 'S (42-44)',
+            description: 'Привет! Меня зовут Виктория, мне 22 года. Я утонченная девушка с модельной внешностью и приятным характером. Люблю интересное общение, романтические встречи и новые впечатления. Гарантирую полную конфиденциальность и незабываемое времяпрепровождение. Встречаюсь только с интеллигентными и щедрыми мужчинами. Встречи только на моей территории или в отелях.',
+            services: [
+                'Классический секс',
+                'Минет в презервативе',
+                'Минет без презерватива',
+                'Массаж классический',
+                'Поцелуи',
+                'Куннилингус',
+                'Расслабляющий массаж',
+                'Легкий БДСМ',
+                'Ролевые игры'
+            ],
+            price: 8000,
+            phone: '+7 (916) 555-12-34',
+            images: [
+                {
+                    type: 'image/jpeg',
+                    data: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iI0ZGNkIzNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjI0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+VmlrdG9yaWE8L3RleHQ+PC9zdmc+',
+                    name: 'photo1.jpg'
+                },
+                {
+                    type: 'image/jpeg',
+                    data: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iI0ZGOEMyQSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjI0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+UGhvdG8gMjwvdGV4dD48L3N2Zz4=',
+                    name: 'photo2.jpg'
+                },
+                {
+                    type: 'image/jpeg',
+                    data: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iI0ZGQTcwQSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjI0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+UGhvdG8gMzwvdGV4dD48L3N2Zz4=',
+                    name: 'photo3.jpg'
+                }
+            ],
+            videos: [],
+            rating: 4.8,
+            reviewCount: 1,
+            views: 156,
+            verified: true,
+            plan: 'premium',
+            createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // 7 дней назад
+        };
+
+        // Добавляем анкету
+        AppState.profiles.push(testProfile);
+
+        // Добавляем тестовый отзыв
+        if (!AppState.reviews[testProfileId]) {
+            AppState.reviews[testProfileId] = [];
+        }
+
+        AppState.reviews[testProfileId].push({
+            id: 'review-test-001',
+            profileId: testProfileId,
+            author: 'Дмитрий',
+            rating: 5,
+            text: 'Отличная девушка! Очень приятная в общении, красивая и ухоженная. Встреча прошла на высшем уровне, все как договаривались. Обязательно встретимся снова. Рекомендую!',
+            date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 дня назад
+        });
+
+        saveToLocalStorage();
+    }
 }
