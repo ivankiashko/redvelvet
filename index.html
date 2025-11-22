@@ -1233,6 +1233,78 @@
         </div>
     </div>
 
+    <!-- Модальное окно предупреждения и выбора роли -->
+    <div id="ageVerificationModal" class="modal active" style="background: rgba(0, 0, 0, 0.95);">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">🔞</div>
+                <h1 style="font-size: 36px; margin-bottom: 10px; background: linear-gradient(135deg, var(--primary-orange) 0%, var(--secondary-pink) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">RedVelvet Platform</h1>
+                <p style="color: var(--text-gray); font-size: 16px;">Премиум платформа эскорт-услуг</p>
+            </div>
+
+            <div style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 107, 53, 0.05)); border: 2px solid rgba(255, 107, 53, 0.3); border-radius: 12px; padding: 30px; margin-bottom: 30px;">
+                <h2 style="color: var(--primary-orange); margin-bottom: 20px; font-size: 24px; text-align: center;">⚠️ Предупреждение</h2>
+                <div style="color: var(--text-gray); line-height: 1.8; font-size: 15px;">
+                    <p style="margin-bottom: 15px;"><strong style="color: var(--text-white);">Доступ к платформе разрешен только лицам старше 18 лет.</strong></p>
+
+                    <p style="margin-bottom: 15px;">Данная платформа предоставляет информационные услуги для взрослых. Все материалы и услуги предназначены исключительно для совершеннолетних пользователей.</p>
+
+                    <h3 style="color: var(--primary-orange); font-size: 18px; margin-top: 25px; margin-bottom: 15px;">Обязательства платформы:</h3>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li style="margin-bottom: 10px;">✓ Конфиденциальность и безопасность данных пользователей</li>
+                        <li style="margin-bottom: 10px;">✓ Модерация анкет и проверка достоверности информации</li>
+                        <li style="margin-bottom: 10px;">✓ Защита от мошенничества и недобросовестных пользователей</li>
+                        <li style="margin-bottom: 10px;">✓ Поддержка пользователей 24/7</li>
+                    </ul>
+
+                    <h3 style="color: var(--primary-orange); font-size: 18px; margin-top: 25px; margin-bottom: 15px;">Законодательные нюансы:</h3>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li style="margin-bottom: 10px;">• Платформа не несет ответственности за личные договоренности между пользователями</li>
+                        <li style="margin-bottom: 10px;">• Все услуги предоставляются на основании добровольного соглашения между совершеннолетними лицами</li>
+                        <li style="margin-bottom: 10px;">• Пользователи несут личную ответственность за соблюдение законодательства своей страны</li>
+                        <li style="margin-bottom: 10px;">• Запрещено размещение материалов, нарушающих законодательство РФ</li>
+                    </ul>
+
+                    <p style="margin-top: 25px; padding: 20px; background: rgba(255, 107, 53, 0.15); border-left: 4px solid var(--primary-orange); border-radius: 8px;">
+                        <strong style="color: var(--primary-orange);">Важно:</strong> Продолжая использование платформы, вы подтверждаете, что вам исполнилось 18 лет, и вы осознаете характер предоставляемых услуг.
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h2 style="text-align: center; margin-bottom: 25px; font-size: 24px;">Выберите вашу роль</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <button class="btn btn-outline" onclick="selectUserRole('client')" style="padding: 30px; font-size: 18px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                        <div style="font-size: 48px;">👤</div>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 5px;">Клиент</div>
+                            <div style="font-size: 13px; color: var(--text-gray);">Поиск и бронирование услуг</div>
+                        </div>
+                    </button>
+                    <button class="btn btn-outline" onclick="selectUserRole('model')" style="padding: 30px; font-size: 18px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                        <div style="font-size: 48px;">💎</div>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 5px;">Модель</div>
+                            <div style="font-size: 13px; color: var(--text-gray);">Размещение анкеты</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="toggle-wrapper" style="justify-content: center; margin-bottom: 20px;">
+                    <label class="toggle-label" for="confirmAge18" style="flex: 0 1 auto;">
+                        <strong>Мне исполнилось 18 лет, и я принимаю условия использования платформы *</strong>
+                    </label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="confirmAge18">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Контейнер для toast уведомлений -->
     <div id="toastContainer"></div>
 
