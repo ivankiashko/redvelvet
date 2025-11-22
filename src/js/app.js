@@ -10,7 +10,9 @@ const AppState = {
     selectedReviewRating: 0,
     mediaFiles: [], // Загруженные медиа файлы
     inModelCreationMode: false, // Флаг для отслеживания режима создания/редактирования анкеты
-    profilePaymentStatus: null // Статус оплаты анкеты: null, 'basic', 'premium', 'vip'
+    profilePaymentStatus: null, // Статус оплаты анкеты: null, 'basic', 'premium', 'vip'
+    selectedRole: null, // Выбранная роль пользователя: 'client' или 'model'
+    ageVerified: false // Подтверждение возраста 18+
 };
 
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
@@ -40,6 +42,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // Удаляем флаг после выполнения
         localStorage.removeItem('redvelvet_delete_profile_flag');
+    }
+
+    // Проверяем, подтвердил ли пользователь возраст и выбрал роль
+    if (!AppState.ageVerified || !AppState.selectedRole) {
+        // Показываем модальное окно предупреждения
+        showModal('ageVerificationModal');
+    } else {
+        // Скрываем модальное окно если уже подтвердили
+        closeModal('ageVerificationModal');
     }
 
     updateNavigation();
@@ -91,12 +102,16 @@ function loadFromLocalStorage() {
     const savedProfiles = localStorage.getItem('redvelvet_profiles');
     const savedReviews = localStorage.getItem('redvelvet_reviews');
     const savedPaymentStatus = localStorage.getItem('redvelvet_payment_status');
+    const savedSelectedRole = localStorage.getItem('redvelvet_selected_role');
+    const savedAgeVerified = localStorage.getItem('redvelvet_age_verified');
 
     if (savedUser) AppState.currentUser = JSON.parse(savedUser);
     if (savedProfile) AppState.currentProfile = JSON.parse(savedProfile);
     if (savedProfiles) AppState.profiles = JSON.parse(savedProfiles);
     if (savedReviews) AppState.reviews = JSON.parse(savedReviews);
     if (savedPaymentStatus) AppState.profilePaymentStatus = savedPaymentStatus;
+    if (savedSelectedRole) AppState.selectedRole = savedSelectedRole;
+    if (savedAgeVerified) AppState.ageVerified = savedAgeVerified === 'true';
 }
 
 function saveToLocalStorage() {
@@ -111,6 +126,10 @@ function saveToLocalStorage() {
     if (AppState.profilePaymentStatus) {
         localStorage.setItem('redvelvet_payment_status', AppState.profilePaymentStatus);
     }
+    if (AppState.selectedRole) {
+        localStorage.setItem('redvelvet_selected_role', AppState.selectedRole);
+    }
+    localStorage.setItem('redvelvet_age_verified', AppState.ageVerified.toString());
 }
 
 // ==================== TOAST УВЕДОМЛЕНИЯ ====================
@@ -224,11 +243,15 @@ function updateNavigation() {
     }
 
     if (!AppState.currentUser) {
-        // Гость: показываем раздельные кнопки входа для клиентов и моделей
-        nav.innerHTML = `
-            <button class="btn btn-outline" onclick="showRegister()">Вход клиента</button>
-            <button class="btn btn-outline" onclick="showModelRegister()">Вход модели</button>
-        `;
+        // Гость: показываем единственную кнопку "Авторизация" после выбора роли
+        if (AppState.selectedRole && AppState.ageVerified) {
+            nav.innerHTML = `
+                <button class="btn btn-outline" onclick="showAuthModal()">Авторизация</button>
+            `;
+        } else {
+            // Если роль не выбрана, не показываем кнопки (они откроются после выбора роли)
+            nav.innerHTML = '';
+        }
     } else if (AppState.currentUser.type === 'client') {
         // Клиент: показываем Мой профиль и Выход
         nav.innerHTML = `
@@ -410,6 +433,75 @@ function showModelLogin() {
 
 function showWalletModal() {
     showModal('walletModal');
+}
+
+// ==================== ВЫБОР РОЛИ И ПОДТВЕРЖДЕНИЕ ВОЗРАСТА ====================
+function selectUserRole(role) {
+    // Проверяем, подтвержден ли возраст
+    const ageConfirmed = document.getElementById('confirmAge18').checked;
+
+    if (!ageConfirmed) {
+        showToast('Пожалуйста, подтвердите, что вам исполнилось 18 лет', 'warning', 5000);
+        return;
+    }
+
+    // Сохраняем выбранную роль и подтверждение возраста
+    AppState.selectedRole = role;
+    AppState.ageVerified = true;
+    saveToLocalStorage();
+
+    // Закрываем модальное окно предупреждения
+    closeModal('ageVerificationModal');
+
+    // Обновляем навигацию для показа кнопки "Авторизация"
+    updateNavigation();
+
+    // Показываем приветственное сообщение
+    const roleText = role === 'client' ? 'клиента' : 'модели';
+    showToast(`Добро пожаловать! Вы выбрали роль ${roleText}. Теперь вы можете авторизоваться.`, 'success', 5000);
+}
+
+function showAuthModal() {
+    // Показываем соответствующее модальное окно в зависимости от выбранной роли
+    if (AppState.selectedRole === 'client') {
+        // Для клиента - сначала показываем выбор: регистрация или вход
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.id = 'authChoiceModal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px; text-align: center;">
+                <button class="modal-close" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove();">&times;</button>
+                <h2 style="margin-bottom: 30px;">Авторизация клиента</h2>
+                <p style="color: var(--text-gray); margin-bottom: 30px;">Выберите действие для продолжения</p>
+                <button class="btn btn-outline" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove(); showRegister();" style="width: 100%; margin-bottom: 15px; font-size: 18px; padding: 15px;">
+                    Регистрация
+                </button>
+                <button class="btn btn-outline" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove(); showLogin();" style="width: 100%; font-size: 18px; padding: 15px;">
+                    Вход
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    } else if (AppState.selectedRole === 'model') {
+        // Для модели - показываем выбор: регистрация или вход
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.id = 'authChoiceModal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px; text-align: center;">
+                <button class="modal-close" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove();">&times;</button>
+                <h2 style="margin-bottom: 30px;">Авторизация модели</h2>
+                <p style="color: var(--text-gray); margin-bottom: 30px;">Выберите действие для продолжения</p>
+                <button class="btn btn-outline" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove(); showModelRegister();" style="width: 100%; margin-bottom: 15px; font-size: 18px; padding: 15px;">
+                    Регистрация
+                </button>
+                <button class="btn btn-outline" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove(); showModelLogin();" style="width: 100%; font-size: 18px; padding: 15px;">
+                    Вход
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
 }
 
 // ==================== РЕГИСТРАЦИЯ И ВХОД ====================
