@@ -13,7 +13,9 @@ const AppState = {
     profilePaymentStatus: null, // Статус оплаты анкеты: null, 'basic', 'premium', 'vip'
     selectedRole: null, // Выбранная роль пользователя: 'client' или 'model'
     ageVerified: false, // Подтверждение возраста 18+
-    favorites: [] // ID избранных анкет (только для залогиненных клиентов)
+    favorites: [], // ID избранных анкет (только для залогиненных клиентов)
+    anonymousMode: false, // Анонимный режим (отключает возможность оставлять отзывы)
+    registeredEmails: [] // Список всех зарегистрированных email-адресов
 };
 
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
@@ -106,6 +108,8 @@ function loadFromLocalStorage() {
     const savedSelectedRole = localStorage.getItem('redvelvet_selected_role');
     const savedAgeVerified = localStorage.getItem('redvelvet_age_verified');
     const savedFavorites = localStorage.getItem('redvelvet_favorites');
+    const savedAnonymousMode = localStorage.getItem('redvelvet_anonymous_mode');
+    const savedRegisteredEmails = localStorage.getItem('redvelvet_registered_emails');
 
     if (savedUser) AppState.currentUser = JSON.parse(savedUser);
     if (savedProfile) AppState.currentProfile = JSON.parse(savedProfile);
@@ -115,6 +119,8 @@ function loadFromLocalStorage() {
     if (savedSelectedRole) AppState.selectedRole = savedSelectedRole;
     if (savedAgeVerified) AppState.ageVerified = savedAgeVerified === 'true';
     if (savedFavorites) AppState.favorites = JSON.parse(savedFavorites);
+    if (savedAnonymousMode) AppState.anonymousMode = savedAnonymousMode === 'true';
+    if (savedRegisteredEmails) AppState.registeredEmails = JSON.parse(savedRegisteredEmails);
 }
 
 function saveToLocalStorage() {
@@ -134,6 +140,8 @@ function saveToLocalStorage() {
     }
     localStorage.setItem('redvelvet_age_verified', AppState.ageVerified.toString());
     localStorage.setItem('redvelvet_favorites', JSON.stringify(AppState.favorites));
+    localStorage.setItem('redvelvet_anonymous_mode', AppState.anonymousMode.toString());
+    localStorage.setItem('redvelvet_registered_emails', JSON.stringify(AppState.registeredEmails));
 }
 
 // ==================== TOAST УВЕДОМЛЕНИЯ ====================
@@ -171,12 +179,12 @@ function showConfirm(message, onConfirm, onCancel) {
     modal.style.zIndex = '10001';
 
     modal.innerHTML = `
-        <div class="modal-content" style="max-width: 500px;">
-            <h2 style="margin-bottom: 20px;">Подтверждение</h2>
-            <p style="color: var(--text-gray); line-height: 1.6; white-space: pre-line; margin-bottom: 30px;">${message}</p>
-            <div style="display: flex; gap: 15px; justify-content: flex-end;">
-                <button class="btn btn-outline cancel-btn" style="min-width: 120px;">Отмена</button>
-                <button class="btn btn-primary confirm-btn" style="min-width: 120px;">ОК</button>
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <h2 style="margin-bottom: 20px; color: var(--primary-orange); text-align: center;">Подтверждение</h2>
+            <p style="color: var(--text-gray); line-height: 1.8; white-space: pre-line; margin-bottom: 30px; text-align: center; font-size: 16px;">${message}</p>
+            <div style="display: flex; gap: 15px; justify-content: center; align-items: center;">
+                <button class="btn btn-outline cancel-btn" style="min-width: 130px; flex: 1; max-width: 180px;">Отмена</button>
+                <button class="btn btn-primary confirm-btn" style="min-width: 130px; flex: 1; max-width: 180px;">ОК</button>
             </div>
         </div>
     `;
@@ -378,6 +386,12 @@ function showModelInterface() {
 function updateClientDashboard() {
     updateWalletDisplay('client');
 
+    // Обновляем состояние тумблера анонимного режима
+    const anonymousModeToggle = document.getElementById('anonymousModeToggle');
+    if (anonymousModeToggle) {
+        anonymousModeToggle.checked = AppState.anonymousMode;
+    }
+
     // Обновляем избранные анкеты
     const favoritesGrid = document.getElementById('favoritesGrid');
     if (favoritesGrid) {
@@ -398,6 +412,18 @@ function updateClientDashboard() {
                 });
             }
         }
+    }
+}
+
+// Функция для переключения анонимного режима
+function toggleAnonymousMode() {
+    AppState.anonymousMode = !AppState.anonymousMode;
+    saveToLocalStorage();
+
+    if (AppState.anonymousMode) {
+        showToast('Анонимный режим включен. Вы не сможете оставлять отзывы', 'info', 4000);
+    } else {
+        showToast('Анонимный режим выключен. Теперь вы можете оставлять отзывы', 'success', 4000);
     }
 }
 
@@ -476,7 +502,12 @@ function closeModal(modalId) {
 }
 
 function showRegister() {
-    showModal('registerModal');
+    // Если пользователь уже регистрировался ранее, показываем окно входа
+    if (AppState.registeredEmails.length > 0) {
+        showLogin();
+    } else {
+        showModal('registerModal');
+    }
 }
 
 function showLogin() {
@@ -484,7 +515,12 @@ function showLogin() {
 }
 
 function showModelRegister() {
-    showModal('modelRegisterModal');
+    // Если пользователь уже регистрировался ранее, показываем окно входа
+    if (AppState.registeredEmails.length > 0) {
+        showModelLogin();
+    } else {
+        showModal('modelRegisterModal');
+    }
 }
 
 function showModelLogin() {
@@ -561,6 +597,11 @@ function handleRegister(event) {
         type: 'client',
         wallet: null
     };
+
+    // Добавляем email в список зарегистрированных
+    if (!AppState.registeredEmails.includes(email)) {
+        AppState.registeredEmails.push(email);
+    }
 
     saveToLocalStorage();
     closeModal('registerModal');
@@ -647,6 +688,11 @@ function handleModelRegister(event) {
         type: 'model',
         wallet: null
     };
+
+    // Добавляем email в список зарегистрированных
+    if (!AppState.registeredEmails.includes(email)) {
+        AppState.registeredEmails.push(email);
+    }
 
     saveToLocalStorage();
     closeModal('modelRegisterModal');
@@ -792,7 +838,6 @@ function updateWalletDisplay(userType) {
     if (!AppState.currentUser || !AppState.currentUser.wallet) {
         walletInfo.innerHTML = `
             <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid var(--border-gray);">
-                <div style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;">💳</div>
                 <h3 style="color: var(--text-gray); font-size: 16px; margin-bottom: 5px;">Кошелек не привязан</h3>
                 <p style="color: var(--text-gray); font-size: 14px; opacity: 0.7;">Привяжите криптокошелек для получения платежей</p>
             </div>
@@ -803,14 +848,9 @@ function updateWalletDisplay(userType) {
 
         walletInfo.innerHTML = `
             <div style="padding: 20px; background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 107, 0, 0.05) 100%); border-radius: 8px; border: 1px solid rgba(255, 107, 0, 0.3);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="font-size: 32px;">✓</div>
-                        <div>
-                            <h3 style="font-size: 18px; color: var(--primary-orange); margin: 0;">Кошелек привязан</h3>
-                            <p style="font-size: 12px; color: var(--text-gray); margin: 5px 0 0 0;">Вы можете получать платежи</p>
-                        </div>
-                    </div>
+                <div style="margin-bottom: 15px;">
+                    <h3 style="font-size: 18px; color: var(--primary-orange); margin: 0 0 5px 0;">Кошелек привязан</h3>
+                    <p style="font-size: 12px; color: var(--text-gray); margin: 0;">Вы можете получать платежи</p>
                 </div>
                 <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 6px; margin-bottom: 10px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
@@ -1141,7 +1181,6 @@ function renderHomeProfiles() {
     if (filteredProfiles.length === 0) {
         grid.innerHTML = `
             <div class="no-profiles-message">
-                <div class="no-profiles-icon">🔍</div>
                 <h2 class="no-profiles-title">Анкеты не найдены</h2>
                 <p class="no-profiles-text">Попробуйте изменить параметры поиска или сбросить фильтры</p>
             </div>
@@ -1164,7 +1203,6 @@ function renderProfiles() {
     if (filteredProfiles.length === 0) {
         grid.innerHTML = `
             <div class="no-profiles-message">
-                <div class="no-profiles-icon">🔍</div>
                 <h2 class="no-profiles-title">Анкеты не найдены</h2>
                 <p class="no-profiles-text">Попробуйте изменить параметры поиска или сбросить фильтры</p>
             </div>
@@ -1491,6 +1529,11 @@ function openReviewModal() {
         return;
     }
 
+    if (AppState.anonymousMode) {
+        showToast('В анонимном режиме нельзя оставлять отзывы', 'warning', 5000);
+        return;
+    }
+
     closeModal('profileModal');
     AppState.selectedReviewRating = 0;
     updateReviewStars();
@@ -1521,6 +1564,12 @@ function handleReviewSubmit(event) {
 
     if (!AppState.currentUser) {
         showToast('Необходимо войти в аккаунт', 'warning', 4000);
+        return;
+    }
+
+    if (AppState.anonymousMode) {
+        showToast('В анонимном режиме нельзя оставлять отзывы', 'warning', 5000);
+        closeModal('reviewModal');
         return;
     }
 
