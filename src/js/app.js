@@ -12,7 +12,8 @@ const AppState = {
     inModelCreationMode: false, // Флаг для отслеживания режима создания/редактирования анкеты
     profilePaymentStatus: null, // Статус оплаты анкеты: null, 'basic', 'premium', 'vip'
     selectedRole: null, // Выбранная роль пользователя: 'client' или 'model'
-    ageVerified: false // Подтверждение возраста 18+
+    ageVerified: false, // Подтверждение возраста 18+
+    favorites: [] // ID избранных анкет (только для залогиненных клиентов)
 };
 
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
@@ -104,6 +105,7 @@ function loadFromLocalStorage() {
     const savedPaymentStatus = localStorage.getItem('redvelvet_payment_status');
     const savedSelectedRole = localStorage.getItem('redvelvet_selected_role');
     const savedAgeVerified = localStorage.getItem('redvelvet_age_verified');
+    const savedFavorites = localStorage.getItem('redvelvet_favorites');
 
     if (savedUser) AppState.currentUser = JSON.parse(savedUser);
     if (savedProfile) AppState.currentProfile = JSON.parse(savedProfile);
@@ -112,6 +114,7 @@ function loadFromLocalStorage() {
     if (savedPaymentStatus) AppState.profilePaymentStatus = savedPaymentStatus;
     if (savedSelectedRole) AppState.selectedRole = savedSelectedRole;
     if (savedAgeVerified) AppState.ageVerified = savedAgeVerified === 'true';
+    if (savedFavorites) AppState.favorites = JSON.parse(savedFavorites);
 }
 
 function saveToLocalStorage() {
@@ -130,6 +133,7 @@ function saveToLocalStorage() {
         localStorage.setItem('redvelvet_selected_role', AppState.selectedRole);
     }
     localStorage.setItem('redvelvet_age_verified', AppState.ageVerified.toString());
+    localStorage.setItem('redvelvet_favorites', JSON.stringify(AppState.favorites));
 }
 
 // ==================== TOAST УВЕДОМЛЕНИЯ ====================
@@ -203,9 +207,26 @@ function showConfirm(message, onConfirm, onCancel) {
 }
 
 // ==================== НАВИГАЦИЯ И ИНТЕРФЕЙС ====================
+// Функция для определения активного интерфейса
+function getCurrentInterface() {
+    if (!document.getElementById('homeInterface').classList.contains('hidden')) {
+        return 'home';
+    } else if (!document.getElementById('clientDashboard').classList.contains('hidden')) {
+        return 'clientDashboard';
+    } else if (!document.getElementById('modelInterface').classList.contains('hidden')) {
+        return 'modelInterface';
+    } else if (!document.getElementById('clientInterface').classList.contains('hidden')) {
+        return 'clientInterface';
+    }
+    return 'home';
+}
+
 function updateNavigation() {
     const nav = document.getElementById('mainNav');
     nav.innerHTML = '';
+
+    // Определяем текущий активный интерфейс
+    const currentInterface = getCurrentInterface();
 
     // Если в режиме создания/редактирования анкеты
     if (AppState.inModelCreationMode) {
@@ -253,21 +274,39 @@ function updateNavigation() {
             nav.innerHTML = '';
         }
     } else if (AppState.currentUser.type === 'client') {
-        // Клиент: показываем Мой профиль и Выход
-        nav.innerHTML = `
-            <button class="btn btn-outline" onclick="showClientDashboard()">Мой профиль</button>
-            <button class="btn btn-outline" onclick="logout()">Выход</button>
-        `;
+        // Клиент: переключаем между "Мой профиль" и "К анкетам"
+        if (currentInterface === 'clientDashboard') {
+            // В профиле клиента - показываем "К анкетам"
+            nav.innerHTML = `
+                <button class="btn btn-outline" onclick="showHomeInterface()">К анкетам</button>
+                <button class="btn btn-outline" onclick="logout()">Выход</button>
+            `;
+        } else {
+            // На главной или в анкетах - показываем "Мой профиль"
+            nav.innerHTML = `
+                <button class="btn btn-outline" onclick="showClientDashboard()">Мой профиль</button>
+                <button class="btn btn-outline" onclick="logout()">Выход</button>
+            `;
+        }
     } else if (AppState.currentUser.type === 'model') {
-        // Модель: показываем кнопку в зависимости от статуса анкеты
-        const hasProfile = AppState.currentProfile !== null;
-        const modelButtonText = hasProfile
-            ? (AppState.profilePaymentStatus ? 'Моя анкета' : 'Моя анкета (не оплачена)')
-            : 'Создать анкету';
-        nav.innerHTML = `
-            <button class="btn btn-outline" onclick="showModelInterface()">${modelButtonText}</button>
-            <button class="btn btn-outline" onclick="logout()">Выход</button>
-        `;
+        // Модель: переключаем между анкетой и просмотром анкет
+        if (currentInterface === 'modelInterface') {
+            // В интерфейсе модели - показываем "К анкетам"
+            nav.innerHTML = `
+                <button class="btn btn-outline" onclick="showHomeInterface()">К анкетам</button>
+                <button class="btn btn-outline" onclick="logout()">Выход</button>
+            `;
+        } else {
+            // На главной - показываем кнопку в зависимости от статуса анкеты
+            const hasProfile = AppState.currentProfile !== null;
+            const modelButtonText = hasProfile
+                ? (AppState.profilePaymentStatus ? 'Моя анкета' : 'Моя анкета (не оплачена)')
+                : 'Создать анкету';
+            nav.innerHTML = `
+                <button class="btn btn-outline" onclick="showModelInterface()">${modelButtonText}</button>
+                <button class="btn btn-outline" onclick="logout()">Выход</button>
+            `;
+        }
     }
 }
 
@@ -338,7 +377,28 @@ function showModelInterface() {
 
 function updateClientDashboard() {
     updateWalletDisplay('client');
-    // TODO: Обновить избранные анкеты и историю отзывов
+
+    // Обновляем избранные анкеты
+    const favoritesGrid = document.getElementById('favoritesGrid');
+    if (favoritesGrid) {
+        favoritesGrid.innerHTML = '';
+
+        if (AppState.favorites.length === 0) {
+            favoritesGrid.innerHTML = '<p class="no-data">У вас пока нет избранных анкет</p>';
+        } else {
+            // Получаем анкеты из избранного
+            const favoriteProfiles = AppState.profiles.filter(p => AppState.favorites.includes(p.id));
+
+            if (favoriteProfiles.length === 0) {
+                favoritesGrid.innerHTML = '<p class="no-data">Избранные анкеты больше не доступны</p>';
+            } else {
+                favoriteProfiles.forEach(profile => {
+                    const card = createProfileCard(profile);
+                    favoritesGrid.appendChild(card);
+                });
+            }
+        }
+    }
 }
 
 function updateModelStats() {
@@ -1040,6 +1100,37 @@ function removeMedia(index) {
     renderMediaPreview();
 }
 
+// ==================== ИЗБРАННОЕ ====================
+function toggleFavorite(profileId) {
+    // Проверяем, авторизован ли пользователь
+    if (!AppState.currentUser || AppState.currentUser.type !== 'client') {
+        showToast('Для добавления в избранное необходимо войти как клиент', 'warning', 4000);
+        return;
+    }
+
+    const index = AppState.favorites.indexOf(profileId);
+    if (index === -1) {
+        // Добавляем в избранное
+        AppState.favorites.push(profileId);
+        showToast('Анкета добавлена в избранное', 'success', 3000);
+    } else {
+        // Удаляем из избранного
+        AppState.favorites.splice(index, 1);
+        showToast('Анкета удалена из избранного', 'info', 3000);
+    }
+
+    saveToLocalStorage();
+
+    // Перерисовываем анкеты для обновления звездочек
+    renderHomeProfiles();
+    renderProfiles();
+    updateClientDashboard();
+}
+
+function isFavorite(profileId) {
+    return AppState.favorites.includes(profileId);
+}
+
 // ==================== ОТОБРАЖЕНИЕ ПРОФИЛЕЙ ====================
 function renderHomeProfiles() {
     const grid = document.getElementById('homeProfilesGrid');
@@ -1048,7 +1139,13 @@ function renderHomeProfiles() {
     const filteredProfiles = applyHomeFilters();
 
     if (filteredProfiles.length === 0) {
-        grid.innerHTML = '<p class="no-data">Анкеты не найдены</p>';
+        grid.innerHTML = `
+            <div class="no-profiles-message">
+                <div class="no-profiles-icon">🔍</div>
+                <h2 class="no-profiles-title">Анкеты не найдены</h2>
+                <p class="no-profiles-text">Попробуйте изменить параметры поиска или сбросить фильтры</p>
+            </div>
+        `;
         return;
     }
 
@@ -1065,7 +1162,13 @@ function renderProfiles() {
     const filteredProfiles = applyFilters();
 
     if (filteredProfiles.length === 0) {
-        grid.innerHTML = '<p class="no-data">Анкеты не найдены</p>';
+        grid.innerHTML = `
+            <div class="no-profiles-message">
+                <div class="no-profiles-icon">🔍</div>
+                <h2 class="no-profiles-title">Анкеты не найдены</h2>
+                <p class="no-profiles-text">Попробуйте изменить параметры поиска или сбросить фильтры</p>
+            </div>
+        `;
         return;
     }
 
@@ -1078,7 +1181,12 @@ function renderProfiles() {
 function createProfileCard(profile) {
     const card = document.createElement('div');
     card.className = 'profile-card';
-    card.onclick = () => openProfileModal(profile.id);
+    card.onclick = (e) => {
+        // Проверяем, не нажали ли на кнопку избранного
+        if (!e.target.closest('.favorite-btn')) {
+            openProfileModal(profile.id);
+        }
+    };
 
     const imageUrl = profile.images && profile.images.length > 0
         ? profile.images[0].data
@@ -1086,10 +1194,19 @@ function createProfileCard(profile) {
 
     const stars = generateStars(profile.rating || 0);
 
+    // Определяем, показывать ли кнопку избранного
+    const showFavoriteBtn = AppState.currentUser && AppState.currentUser.type === 'client';
+    const inFavorites = isFavorite(profile.id);
+
     card.innerHTML = `
         <div class="profile-image">
             <img src="${imageUrl}" alt="${profile.name}">
             ${profile.verified ? '<div class="profile-badge">✓ Проверено</div>' : ''}
+            ${showFavoriteBtn ? `
+                <button class="favorite-btn ${inFavorites ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${profile.id})">
+                    <span class="favorite-icon">★</span>
+                </button>
+            ` : ''}
         </div>
         <div class="profile-info">
             <div class="profile-name">${profile.name}, ${profile.age} лет</div>

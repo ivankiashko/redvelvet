@@ -976,6 +976,20 @@
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('walletModal')">&times;</button>
             <h2>Привязать криптокошелек</h2>
+
+            <!-- Предупреждение о статусе разработки -->
+            <div style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.05)); border: 2px solid rgba(255, 107, 53, 0.4); border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <div style="font-size: 28px;">⚠</div>
+                    <h3 style="color: var(--primary-orange); margin: 0; font-size: 18px;">Функция в разработке</h3>
+                </div>
+                <p style="color: var(--text-gray); line-height: 1.6; margin: 0;">
+                    Функция оплаты через криптокошелек находится в стадии разработки.
+                    В настоящее время доступны только <strong style="color: var(--primary-orange);">платежи по договоренности</strong>.
+                    Вы можете привязать кошелек для будущего использования.
+                </p>
+            </div>
+
             <form onsubmit="handleWalletLink(event)">
                 <div class="form-group">
                     <label>Тип кошелька *</label>
