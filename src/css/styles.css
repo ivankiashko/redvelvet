@@ -736,6 +736,58 @@ nav {
     transform: scale(1.1);
 }
 
+/* Кнопка избранного */
+.favorite-btn {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+.favorite-btn:hover {
+    transform: scale(1.15);
+    background: rgba(0, 0, 0, 0.85);
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+}
+
+.favorite-icon {
+    font-size: 28px;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.favorite-btn.active .favorite-icon {
+    color: var(--primary-orange);
+    text-shadow: 0 0 15px rgba(255, 107, 53, 0.8);
+    animation: favoriteGlow 2s ease-in-out infinite;
+}
+
+.favorite-btn:active {
+    transform: scale(0.95);
+}
+
+@keyframes favoriteGlow {
+    0%, 100% {
+        text-shadow: 0 0 10px rgba(255, 107, 53, 0.6);
+    }
+    50% {
+        text-shadow: 0 0 25px rgba(255, 107, 53, 1), 0 0 35px rgba(255, 107, 53, 0.8);
+    }
+}
+
 .profile-info {
     position: relative;
     z-index: 2;
@@ -1121,6 +1173,98 @@ nav {
     color: var(--text-gray);
     text-align: center;
     padding: 40px;
+}
+
+/* Стилизованное сообщение об отсутствии анкет */
+.no-profiles-message {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 40px;
+    margin: 40px 0;
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.05));
+    border: 3px solid rgba(255, 107, 53, 0.4);
+    border-radius: 25px;
+    box-shadow: 0 0 40px rgba(255, 107, 53, 0.3), inset 0 0 30px rgba(255, 107, 53, 0.1);
+    animation: noProfilesPulse 3s ease-in-out infinite;
+}
+
+.no-profiles-icon {
+    font-size: 80px;
+    margin-bottom: 25px;
+    filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.5));
+    animation: noProfilesIconFloat 3s ease-in-out infinite;
+}
+
+.no-profiles-title {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--primary-orange);
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 0 0 20px rgba(255, 107, 53, 0.6), 0 0 40px rgba(255, 107, 53, 0.4);
+    animation: noProfilesTitleGlow 2s ease-in-out infinite alternate;
+}
+
+.no-profiles-text {
+    font-size: 20px;
+    color: var(--text-gray);
+    text-align: center;
+    max-width: 600px;
+    line-height: 1.6;
+}
+
+@keyframes noProfilesPulse {
+    0%, 100% {
+        box-shadow: 0 0 30px rgba(255, 107, 53, 0.3), inset 0 0 20px rgba(255, 107, 53, 0.1);
+        border-color: rgba(255, 107, 53, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 50px rgba(255, 107, 53, 0.5), inset 0 0 40px rgba(255, 107, 53, 0.15);
+        border-color: rgba(255, 107, 53, 0.6);
+    }
+}
+
+@keyframes noProfilesIconFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes noProfilesTitleGlow {
+    0% {
+        text-shadow: 0 0 15px rgba(255, 107, 53, 0.5), 0 0 30px rgba(255, 107, 53, 0.3);
+    }
+    100% {
+        text-shadow: 0 0 25px rgba(255, 107, 53, 0.8), 0 0 50px rgba(255, 107, 53, 0.6);
+    }
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .no-profiles-message {
+        padding: 60px 20px;
+        margin: 20px 0;
+    }
+
+    .no-profiles-icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+
+    .no-profiles-title {
+        font-size: 32px;
+        margin-bottom: 15px;
+    }
+
+    .no-profiles-text {
+        font-size: 16px;
+    }
 }
 
 /* Оплата */
