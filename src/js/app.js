@@ -462,45 +462,22 @@ function selectUserRole(role) {
 }
 
 function showAuthModal() {
-    // Показываем соответствующее модальное окно в зависимости от выбранной роли
+    // Проверяем, залогинен ли пользователь
+    if (AppState.currentUser) {
+        // Если пользователь залогинен - перенаправляем в личный кабинет
+        if (AppState.currentUser.type === 'client') {
+            showClientDashboard();
+        } else if (AppState.currentUser.type === 'model') {
+            showModelInterface();
+        }
+        return;
+    }
+
+    // Если пользователь не залогинен - сразу показываем форму регистрации
     if (AppState.selectedRole === 'client') {
-        // Для клиента - сначала показываем выбор: регистрация или вход
-        const modal = document.createElement('div');
-        modal.className = 'modal active';
-        modal.id = 'authChoiceModal';
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 500px; text-align: center;">
-                <button class="modal-close" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove();">&times;</button>
-                <h2 style="margin-bottom: 30px;">Авторизация клиента</h2>
-                <p style="color: var(--text-gray); margin-bottom: 30px;">Выберите действие для продолжения</p>
-                <button class="btn btn-outline" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove(); showRegister();" style="width: 100%; margin-bottom: 15px; font-size: 18px; padding: 15px;">
-                    Регистрация
-                </button>
-                <button class="btn btn-outline" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove(); showLogin();" style="width: 100%; font-size: 18px; padding: 15px;">
-                    Вход
-                </button>
-            </div>
-        `;
-        document.body.appendChild(modal);
+        showRegister();
     } else if (AppState.selectedRole === 'model') {
-        // Для модели - показываем выбор: регистрация или вход
-        const modal = document.createElement('div');
-        modal.className = 'modal active';
-        modal.id = 'authChoiceModal';
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 500px; text-align: center;">
-                <button class="modal-close" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove();">&times;</button>
-                <h2 style="margin-bottom: 30px;">Авторизация модели</h2>
-                <p style="color: var(--text-gray); margin-bottom: 30px;">Выберите действие для продолжения</p>
-                <button class="btn btn-outline" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove(); showModelRegister();" style="width: 100%; margin-bottom: 15px; font-size: 18px; padding: 15px;">
-                    Регистрация
-                </button>
-                <button class="btn btn-outline" onclick="closeModal('authChoiceModal'); this.parentElement.parentElement.remove(); showModelLogin();" style="width: 100%; font-size: 18px; padding: 15px;">
-                    Вход
-                </button>
-            </div>
-        `;
-        document.body.appendChild(modal);
+        showModelRegister();
     }
 }
 
