@@ -354,6 +354,20 @@
             <p class="wallet-status">Кошелек не привязан</p>
         </div>
 
+        <div class="settings-section">
+            <h3>Настройки приватности</h3>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <strong>Анонимный режим</strong>
+                    <p style="color: var(--text-gray); font-size: 14px; margin-top: 5px;">В анонимном режиме вы не сможете оставлять отзывы</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="anonymousModeToggle" onchange="toggleAnonymousMode()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
         <div class="favorites-section">
             <h3>Избранные анкеты</h3>
             <div class="profiles-grid" id="favoritesGrid">
