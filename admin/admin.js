@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Автоматически загружаем все данные при открытии админ панели
     loadProfiles();
     loadReviews();
+
+    // Проверяем, нужно ли создать тестовую анкету
+    checkAndCreateTestProfile();
 });
 
 // ==================== TOAST УВЕДОМЛЕНИЯ ====================
@@ -118,8 +121,9 @@ function updateStatistics() {
     // Общее количество анкет
     document.getElementById('totalProfiles').textContent = data.profiles.length;
 
-    // Общее количество клиентов (пока 0, так как нет реестра)
-    document.getElementById('totalClients').textContent = 0;
+    // Количество анкет на модерации (pending)
+    const pendingCount = data.profiles.filter(p => !p.verified).length;
+    document.getElementById('pendingProfiles').textContent = pendingCount;
 
     // Общее количество отзывов
     let totalReviews = 0;
@@ -128,8 +132,8 @@ function updateStatistics() {
     });
     document.getElementById('totalReviews').textContent = totalReviews;
 
-    // Общее количество транзакций (пока 0, функционал в разработке)
-    document.getElementById('totalTransactions').textContent = 0;
+    // Общее количество клиентов (пока 0, так как нет реестра)
+    document.getElementById('totalClients').textContent = 0;
 }
 
 // ==================== УПРАВЛЕНИЕ АНКЕТАМИ ====================
@@ -149,23 +153,28 @@ function loadProfiles() {
         item.className = 'admin-list-item';
 
         const statusClass = profile.verified ? 'verified' : 'pending';
-        const statusText = profile.verified ? 'Проверено' : 'На модерации';
+        const statusText = profile.verified ? 'Одобрено' : 'На проверке';
+        const visibilityText = profile.verified ? 'Видна всем' : 'Видна только модели';
+
+        // Подсчет фотографий
+        const photosCount = profile.images ? profile.images.length : 0;
 
         item.innerHTML = `
             <h3>${profile.name}, ${profile.age} лет</h3>
             <p><strong>ID:</strong> ${profile.id}</p>
             <p><strong>Город:</strong> ${getCityName(profile.city)}</p>
             <p><strong>Цена:</strong> ${profile.price} ₽/час</p>
+            <p><strong>Фотографий:</strong> ${photosCount}</p>
             <p><strong>Рейтинг:</strong> ${profile.rating ? profile.rating.toFixed(1) : '0.0'} (${profile.reviewCount || 0} отзывов)</p>
             <p><strong>Просмотров:</strong> ${profile.views || 0}</p>
-            <p><strong>Статус:</strong> <span class="profile-status ${statusClass}">${statusText}</span></p>
+            <p><strong>Статус:</strong> <span class="profile-status ${statusClass}">${statusText}</span> - ${visibilityText}</p>
             <p><strong>Создана:</strong> ${new Date(profile.createdAt).toLocaleString('ru-RU')}</p>
             <div class="item-actions">
                 ${!profile.verified ? `
-                    <button class="btn btn-outline" onclick="approveProfile(${profile.id})">Одобрить</button>
-                    <button class="btn btn-outline" onclick="rejectProfile(${profile.id})">Отклонить</button>
+                    <button class="btn btn-outline" onclick="approveProfile(${profile.id})" style="background: rgba(76, 175, 80, 0.1); border-color: rgba(76, 175, 80, 0.3); color: #4CAF50;">Одобрить</button>
+                    <button class="btn btn-outline" onclick="rejectProfile(${profile.id})" style="background: rgba(244, 67, 54, 0.1); border-color: rgba(244, 67, 54, 0.3); color: #F44336;">Отклонить</button>
                 ` : ''}
-                <button class="btn btn-outline" onclick="deleteProfile(${profile.id})">Удалить</button>
+                <button class="btn btn-outline" onclick="deleteProfile(${profile.id})" style="background: rgba(255, 59, 48, 0.1); border-color: rgba(255, 59, 48, 0.3); color: #ff3b30;">Удалить</button>
             </div>
         `;
 
@@ -504,4 +513,86 @@ function handleQuickCreate(event) {
     document.getElementById('quickAge').value = '';
     document.getElementById('quickCity').value = '';
     document.getElementById('quickDescription').value = '';
+}
+
+// ==================== СОЗДАНИЕ ТЕСТОВОЙ АНКЕТЫ ====================
+function checkAndCreateTestProfile() {
+    // Проверяем флаг, создана ли уже тестовая анкета
+    const testProfileCreated = localStorage.getItem('redvelvet_test_profile_created');
+    if (testProfileCreated === 'true') {
+        return; // Тестовая анкета уже создана
+    }
+
+    // Создаем тестовую анкету
+    const data = loadFromLocalStorage();
+
+    // Создаем base64 изображения (простые цветные квадраты для теста)
+    const testImages = [
+        {
+            type: 'image/png',
+            data: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iIzI4MWEwYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjI0IiBmaWxsPSIjZmY2YjM1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+0KLQtdGB0YLQvtCy0L7QtSDRhNC+0YLQviAxPC90ZXh0Pjwvc3ZnPg==',
+            size: 12000,
+            name: 'test-photo-1.png'
+        },
+        {
+            type: 'image/png',
+            data: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iIzFhMWEyOCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjI0IiBmaWxsPSIjZmY4YzQyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+0KLQtdGB0YLQvtCy0L7QtSDRhNC+0YLQviAyPC90ZXh0Pjwvc3ZnPg==',
+            size: 12000,
+            name: 'test-photo-2.png'
+        },
+        {
+            type: 'image/png',
+            data: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iIzI4MWExYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjI0IiBmaWxsPSIjZmZiODRkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+0KLQtdGB0YLQvtCy0L7QtSDRhNC+0YLQviAzPC90ZXh0Pjwvc3ZnPg==',
+            size: 12000,
+            name: 'test-photo-3.png'
+        }
+    ];
+
+    const testProfile = {
+        id: Date.now(),
+        name: 'Анастасия',
+        age: 25,
+        city: 'moscow',
+        height: 170,
+        weight: 55,
+        bustSize: '3',
+        eyeColor: 'Голубые',
+        hairColor: 'Блондинка',
+        nationality: 'Славянка',
+        bodyType: 'Стройная',
+        clothingSize: 'S',
+        description: 'Тестовая анкета для демонстрации функционала. Приятная внешность, образованная девушка.',
+        services: [
+            'Классический секс',
+            'Минет без презерватива',
+            'Куннилингус',
+            'Эротический массаж',
+            'Стриптиз',
+            'Эскорт',
+            'Выезд в отель',
+            'Ролевые игры'
+        ],
+        price: 10000,
+        phone: '+7 (999) 123-45-67',
+        images: testImages,
+        videos: [],
+        rating: 0,
+        reviewCount: 0,
+        views: 0,
+        verified: false, // На модерации
+        createdAt: new Date().toISOString()
+    };
+
+    // Добавляем тестовую анкету
+    data.profiles.push(testProfile);
+    localStorage.setItem('redvelvet_profiles', JSON.stringify(data.profiles));
+
+    // Устанавливаем флаг, что тестовая анкета создана
+    localStorage.setItem('redvelvet_test_profile_created', 'true');
+
+    // Перезагружаем список анкет
+    loadProfiles();
+    updateStatistics();
+
+    showToast('Тестовая анкета "Анастасия" создана и находится на модерации', 'success', 6000);
 }

@@ -37,6 +37,110 @@ body::before {
     text-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
 }
 
+/* Telegram Модерация - Большая заметная секция */
+.telegram-moderation-section {
+    background: linear-gradient(135deg, rgba(255, 149, 0, 0.15) 0%, rgba(255, 107, 53, 0.15) 100%);
+    border: 2px solid rgba(255, 149, 0, 0.5);
+    border-radius: 25px;
+    padding: 40px;
+    margin-bottom: 40px;
+    text-align: center;
+    box-shadow: 0 15px 50px rgba(255, 149, 0, 0.3);
+    animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 15px 50px rgba(255, 149, 0, 0.3);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 20px 60px rgba(255, 149, 0, 0.5);
+        transform: scale(1.01);
+    }
+}
+
+.telegram-moderation-section .telegram-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.telegram-moderation-section h2 {
+    color: #FF9500;
+    font-size: 28px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-shadow: 0 0 15px rgba(255, 149, 0, 0.5);
+}
+
+.telegram-moderation-section > p {
+    color: var(--text-gray);
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-telegram-moderation {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #FF9500 0%, #FF6B35 100%);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 20px 50px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(255, 149, 0, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-telegram-moderation:hover {
+    background: linear-gradient(135deg, #FFB84D 0%, #FF8C42 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(255, 149, 0, 0.6);
+}
+
+.btn-telegram-moderation:active {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px rgba(255, 149, 0, 0.5);
+}
+
+.telegram-icon-inline {
+    font-size: 24px;
+}
+
+.arrow-icon {
+    font-size: 24px;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+.btn-telegram-moderation:hover .arrow-icon {
+    transform: translateX(5px);
+}
+
+.telegram-hint {
+    color: rgba(255, 149, 0, 0.8);
+    font-size: 13px;
+    margin-top: 15px;
+    font-style: italic;
+}
+
 /* Статистика в шапке */
 .dashboard-header {
     margin-bottom: 40px;

@@ -21,6 +21,19 @@
         <div class="admin-dashboard">
             <h1>Панель администратора</h1>
 
+            <!-- Telegram Модерация - Большая заметная кнопка -->
+            <div class="telegram-moderation-section">
+                <div class="telegram-icon">📱</div>
+                <h2>Модерация анкет через Telegram</h2>
+                <p>Перейдите в Telegram бот для удобной модерации анкет с уведомлениями в реальном времени</p>
+                <a href="https://t.me/redvelvet_moderation_bot" target="_blank" class="btn-telegram-moderation">
+                    <span class="telegram-icon-inline">✈️</span>
+                    Перейти к модерации в Telegram
+                    <span class="arrow-icon">→</span>
+                </a>
+                <p class="telegram-hint">Нажмите кнопку выше для перехода в бот модерации</p>
+            </div>
+
             <!-- Общая статистика -->
             <div class="dashboard-header">
                 <h2>Общая статистика</h2>
@@ -30,16 +43,16 @@
                         <div class="stat-card-label">Всего анкет</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-card-value" id="totalClients">0</div>
-                        <div class="stat-card-label">Всего клиентов</div>
+                        <div class="stat-card-value" id="pendingProfiles">0</div>
+                        <div class="stat-card-label">На модерации</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-card-value" id="totalReviews">0</div>
                         <div class="stat-card-label">Всего отзывов</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-card-value" id="totalTransactions">0</div>
-                        <div class="stat-card-label">Всего транзакций</div>
+                        <div class="stat-card-value" id="totalClients">0</div>
+                        <div class="stat-card-label">Всего клиентов</div>
                     </div>
                 </div>
             </div>
