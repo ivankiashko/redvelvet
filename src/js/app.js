@@ -502,12 +502,8 @@ function closeModal(modalId) {
 }
 
 function showRegister() {
-    // Если пользователь уже регистрировался ранее, показываем окно входа
-    if (AppState.registeredEmails.length > 0) {
-        showLogin();
-    } else {
-        showModal('registerModal');
-    }
+    // Всегда показываем окно регистрации, если пользователь явно хочет зарегистрироваться
+    showModal('registerModal');
 }
 
 function showLogin() {
@@ -515,12 +511,8 @@ function showLogin() {
 }
 
 function showModelRegister() {
-    // Если пользователь уже регистрировался ранее, показываем окно входа
-    if (AppState.registeredEmails.length > 0) {
-        showModelLogin();
-    } else {
-        showModal('modelRegisterModal');
-    }
+    // Всегда показываем окно регистрации, если пользователь явно хочет зарегистрироваться
+    showModal('modelRegisterModal');
 }
 
 function showModelLogin() {
@@ -569,11 +561,21 @@ function showAuthModal() {
         return;
     }
 
-    // Если пользователь не залогинен - сразу показываем форму регистрации
+    // Если пользователь не залогинен - показываем форму входа или регистрации
     if (AppState.selectedRole === 'client') {
-        showRegister();
+        // Если есть зарегистрированные пользователи - показываем форму входа, иначе регистрацию
+        if (AppState.registeredEmails.length > 0) {
+            showLogin();
+        } else {
+            showRegister();
+        }
     } else if (AppState.selectedRole === 'model') {
-        showModelRegister();
+        // Если есть зарегистрированные пользователи - показываем форму входа, иначе регистрацию
+        if (AppState.registeredEmails.length > 0) {
+            showModelLogin();
+        } else {
+            showModelRegister();
+        }
     }
 }
 
