@@ -825,7 +825,7 @@
                         <div class="form-group">
                             <label>Фото (обязательно ровно 3 фотографии) *</label>
                         <div class="file-upload" onclick="document.getElementById('mediaUpload').click()">
-                            <div class="upload-icon">📷</div>
+                            <div class="upload-icon">[Фото]</div>
                             <p>Нажмите для загрузки фото</p>
                             <p style="font-size: 12px; color: var(--text-gray); margin-top: 10px;">
                                 Обязательно: ровно 3 фотографии<br>
@@ -994,7 +994,6 @@
             <!-- Предупреждение о статусе разработки -->
             <div style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.05)); border: 2px solid rgba(255, 107, 53, 0.4); border-radius: 12px; padding: 20px; margin-bottom: 25px;">
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                    <div style="font-size: 28px;">⚠</div>
                     <h3 style="color: var(--primary-orange); margin: 0; font-size: 18px;">Функция в разработке</h3>
                 </div>
                 <p style="color: var(--text-gray); line-height: 1.6; margin: 0;">
@@ -1095,9 +1094,15 @@
         <div class="modal-content" style="max-width: 1200px;">
             <button class="modal-close" onclick="closeModal('pricingModal')">&times;</button>
             <h2>Выберите тариф для вашей анкеты</h2>
-            <p style="color: var(--text-gray); margin-bottom: 40px; text-align: center;">
+            <p style="color: var(--text-gray); margin-bottom: 20px; text-align: center;">
                 Увеличьте видимость вашей анкеты и привлеките больше клиентов
             </p>
+            <div style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.05)); border: 2px solid rgba(255, 107, 53, 0.4); border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: center;">
+                <p style="color: var(--text-gray); margin-bottom: 10px;">Для согласования оплаты и проверки анкеты свяжитесь с нами:</p>
+                <a href="https://t.me/redvelvet_admin" target="_blank" style="color: var(--primary-orange); font-size: 18px; font-weight: 600; text-decoration: none;">
+                    Telegram: @redvelvet_admin
+                </a>
+            </div>
 
             <div class="pricing-cards">
                 <!-- Базовый тариф -->
@@ -1148,7 +1153,7 @@
 
                 <!-- Премиум тариф -->
                 <div class="pricing-card pricing-card-premium">
-                    <div class="pricing-badge pricing-badge-premium">Популярный ✓</div>
+                    <div class="pricing-badge pricing-badge-premium">Популярный</div>
                     <div class="pricing-header">
                         <h3>Премиум</h3>
                         <div class="pricing-price">
@@ -1194,7 +1199,7 @@
 
                 <!-- VIP тариф -->
                 <div class="pricing-card">
-                    <div class="pricing-badge">Эксклюзив ✓</div>
+                    <div class="pricing-badge">Эксклюзив</div>
                     <div class="pricing-header">
                         <h3>Эксклюзив</h3>
                         <div class="pricing-price">
@@ -1245,7 +1250,6 @@
     <div id="phoneCallModal" class="modal">
         <div class="modal-content" style="max-width: 600px; text-align: center;">
             <button class="modal-close" onclick="closeModal('phoneCallModal')">&times;</button>
-            <div style="font-size: 64px; margin-bottom: 20px;">📞</div>
             <h2 style="margin-bottom: 20px;">Позвоните для договоренности</h2>
             <p style="color: var(--text-gray); margin-bottom: 30px; font-size: 16px;">
                 Для обсуждения условий и бронирования, пожалуйста, свяжитесь по указанному номеру
@@ -1255,6 +1259,20 @@
                 <a id="phoneNumberLink" href="tel:" style="font-size: 32px; font-weight: 700; color: var(--primary-orange); text-decoration: none; display: block; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255, 107, 53, 0.6);">+7 (___) ___-__-__</a>
                 <p id="modelNameDisplay" style="color: var(--text-gray); font-size: 16px; margin-top: 10px;"></p>
             </div>
+
+            <div style="background: linear-gradient(135deg, rgba(255, 50, 50, 0.2), rgba(255, 50, 50, 0.1)); border: 2px solid rgba(255, 50, 50, 0.5); border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: left;">
+                <h3 style="color: #ff3232; margin-bottom: 15px; font-size: 18px; text-align: center;">Внимание! Предупреждение о предоплатах</h3>
+                <p style="color: var(--text-gray); line-height: 1.8; margin-bottom: 10px;">
+                    Если модель требует предоплату ПЕРЕД встречей - это скорее всего обман!
+                </p>
+                <ul style="list-style: none; padding-left: 0; color: var(--text-gray); line-height: 1.8;">
+                    <li style="margin-bottom: 8px;">• Оплата производится ТОЛЬКО после оказания услуг</li>
+                    <li style="margin-bottom: 8px;">• Никогда не переводите деньги заранее</li>
+                    <li style="margin-bottom: 8px;">• Настоящие модели не требуют предоплату</li>
+                    <li style="margin-bottom: 8px;">• При любых подозрениях свяжитесь с поддержкой: <a href="https://t.me/redvelvet_admin" target="_blank" style="color: var(--primary-orange); text-decoration: none;">@redvelvet_admin</a></li>
+                </ul>
+            </div>
+
             <button class="btn btn-outline" onclick="closeModal('phoneCallModal')" style="width: 100%;">
                 Закрыть
             </button>
@@ -1283,6 +1301,20 @@
                         <li style="margin-bottom: 10px;">✓ Защита от мошенничества и недобросовестных пользователей</li>
                         <li style="margin-bottom: 10px;">✓ Поддержка пользователей 24/7</li>
                     </ul>
+
+                    <h3 style="color: var(--primary-orange); font-size: 18px; margin-top: 25px; margin-bottom: 15px;">О соответствии законодательству РФ:</h3>
+                    <div style="background: rgba(255, 255, 255, 0.05); border-left: 4px solid var(--primary-orange); padding: 15px; margin-bottom: 15px; border-radius: 8px;">
+                        <p style="margin: 0; line-height: 1.8;">
+                            <strong style="color: var(--text-white);">Платформа не нарушает законодательство РФ</strong>, так как:
+                        </p>
+                        <ul style="list-style: none; padding-left: 20px; margin-top: 10px;">
+                            <li style="margin-bottom: 8px;">• Платформа является информационным агрегатором и рекламной площадкой</li>
+                            <li style="margin-bottom: 8px;">• Мы не организуем и не контролируем личные встречи между пользователями</li>
+                            <li style="margin-bottom: 8px;">• Услуги эскорта (сопровождение, встречи, общение) законны в РФ</li>
+                            <li style="margin-bottom: 8px;">• Все участники - совершеннолетние лица, действующие добровольно</li>
+                            <li style="margin-bottom: 8px;">• Платформа модерирует контент и удаляет противоправные материалы</li>
+                        </ul>
+                    </div>
 
                     <h3 style="color: var(--primary-orange); font-size: 18px; margin-top: 25px; margin-bottom: 15px;">Законодательные нюансы:</h3>
                     <ul style="list-style: none; padding-left: 0;">
