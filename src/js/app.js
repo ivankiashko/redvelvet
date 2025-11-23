@@ -440,8 +440,21 @@ function updateModelStats() {
     document.getElementById('ratingValue').textContent = profile.rating ? profile.rating.toFixed(1) : '0.0';
     document.getElementById('reviewsCount').textContent = reviews.length;
 
-    // Позиция в рейтинге
-    const sortedProfiles = [...AppState.profiles].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    // Позиция в рейтинге с учетом тарифа
+    const sortedProfiles = [...AppState.profiles].sort((a, b) => {
+        // Приоритет по тарифу
+        const getPlanPriority = (plan) => {
+            if (plan === 'vip') return 3;
+            if (plan === 'premium') return 2;
+            if (plan === 'basic') return 1;
+            return 0;
+        };
+        const planDiff = getPlanPriority(AppState.profilePaymentStatus) - getPlanPriority(b.paymentPlan || AppState.profilePaymentStatus);
+        if (planDiff !== 0) return planDiff;
+
+        // Затем по рейтингу
+        return (b.rating || 0) - (a.rating || 0);
+    });
     const rank = sortedProfiles.findIndex(p => p.id === profile.id) + 1;
     document.getElementById('rankPosition').textContent = rank > 0 ? rank : '-';
 
@@ -1401,6 +1414,12 @@ function openProfileModal(profileId) {
             </button>
         </div>
 
+        <div style="margin-top: 15px; text-align: center;">
+            <button class="btn btn-outline" onclick="reportProfile(${profileId})" style="background: rgba(255, 107, 53, 0.1); border-color: rgba(255, 107, 53, 0.3); width: 100%;">
+                Пожаловаться на анкету
+            </button>
+        </div>
+
         <div class="reviews-section">
             <h3>Отзывы (${reviews.length})</h3>
             ${reviews.length > 0 ? reviews.map(review => `
@@ -1502,9 +1521,9 @@ function selectPricingPlan(plan, price) {
     };
 
     showToast(
-        `Тариф "${planNames[plan]}" выбран!\n\nВаша анкета опубликована и находится на проверке.\n\nМенеджер свяжется с вами для подтверждения оплаты.\n\nЦена: ${price} ₽/месяц`,
+        `Тариф "${planNames[plan]}" выбран!\n\nВаша анкета опубликована и находится на проверке.\n\nДля согласования оплаты свяжитесь с нами в Telegram:\nhttps://t.me/redvelvet_admin\n\nЦена: ${price} ₽/месяц`,
         'success',
-        8000
+        10000
     );
 
     // Перенаправляем на главную страницу
@@ -1520,6 +1539,22 @@ function showMyProfileView() {
         showToast('Сначала создайте анкету и выберите тариф для её размещения', 'info', 4000);
         showPricingModal();
     }
+}
+
+// ==================== ЖАЛОБЫ ====================
+function reportProfile(profileId) {
+    const profile = AppState.profiles.find(p => p.id === profileId);
+    if (!profile) return;
+
+    showConfirm(
+        `Вы хотите пожаловаться на анкету ${profile.name}?\n\nВы будете перенаправлены в Telegram для подачи жалобы.`,
+        () => {
+            // Открываем телеграм для жалобы
+            const telegramUrl = `https://t.me/redvelvet_admin?text=Жалоба на анкету ID: ${profileId}, Имя: ${profile.name}`;
+            window.open(telegramUrl, '_blank');
+            showToast('Спасибо за обращение. Мы рассмотрим вашу жалобу в течение 24 часов.', 'info', 5000);
+        }
+    );
 }
 
 // ==================== ОТЗЫВЫ ====================
@@ -1655,6 +1690,20 @@ function switchFilterTab(tabName) {
 function applyFilters() {
     let filtered = [...AppState.profiles];
 
+    // Сортировка с приоритетом для премиум и эксклюзив тарифов
+    const getPlanPriority = (plan) => {
+        if (plan === 'vip') return 3;
+        if (plan === 'premium') return 2;
+        if (plan === 'basic') return 1;
+        return 0;
+    };
+
+    filtered.sort((a, b) => {
+        const planDiff = getPlanPriority(b.paymentPlan || AppState.profilePaymentStatus) - getPlanPriority(a.paymentPlan || AppState.profilePaymentStatus);
+        if (planDiff !== 0) return planDiff;
+        return (b.rating || 0) - (a.rating || 0);
+    });
+
     // Поиск по ключевым словам
     const keywords = document.getElementById('searchKeywords').value.toLowerCase();
     if (keywords) {
@@ -1789,6 +1838,20 @@ function switchHomeFilterTab(tabName) {
 
 function applyHomeFilters() {
     let filtered = [...AppState.profiles];
+
+    // Сортировка с приоритетом для премиум и эксклюзив тарифов
+    const getPlanPriority = (plan) => {
+        if (plan === 'vip') return 3;
+        if (plan === 'premium') return 2;
+        if (plan === 'basic') return 1;
+        return 0;
+    };
+
+    filtered.sort((a, b) => {
+        const planDiff = getPlanPriority(b.paymentPlan || AppState.profilePaymentStatus) - getPlanPriority(a.paymentPlan || AppState.profilePaymentStatus);
+        if (planDiff !== 0) return planDiff;
+        return (b.rating || 0) - (a.rating || 0);
+    });
 
     // Поиск по ключевым словам
     const keywordsInput = document.getElementById('searchKeywordsHome');

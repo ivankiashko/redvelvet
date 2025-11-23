@@ -120,14 +120,22 @@ const getProfiles = asyncHandler(async (req, res) => {
 
   const whereClause = whereConditions.join(' AND ');
 
-  // Получаем профили
+  // Получаем профили с приоритетом для премиум и эксклюзив тарифов
   const profilesResult = await query(
     `SELECT p.*,
       (SELECT json_agg(json_build_object('id', pi.id, 'url', pi.image_url, 'order', pi.image_order))
        FROM profile_images pi WHERE pi.profile_id = p.id ORDER BY pi.image_order) as images
      FROM profiles p
      WHERE ${whereClause}
-     ORDER BY p.rating DESC, p.created_at DESC
+     ORDER BY
+       CASE
+         WHEN p.payment_plan = 'vip' THEN 3
+         WHEN p.payment_plan = 'premium' THEN 2
+         WHEN p.payment_plan = 'basic' THEN 1
+         ELSE 0
+       END DESC,
+       p.rating DESC,
+       p.created_at DESC
      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
     [...queryParams, limitNum, offset]
   );
