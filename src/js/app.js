@@ -1405,20 +1405,26 @@ function openProfileModal(profileId) {
             </div>
         </div>
 
-        <div style="margin-top: 30px; display: flex; gap: 10px;">
-            <button class="btn btn-outline" onclick="showPaymentModal()" style="flex: 1;">
-                Забронировать
-            </button>
-            <button class="btn btn-outline" onclick="openReviewModal()" style="flex: 1;">
-                Оставить отзыв
-            </button>
-        </div>
+        ${AppState.currentUser && AppState.currentUser.type === 'client' ? `
+            <div style="margin-top: 30px; display: flex; gap: 10px;">
+                <button class="btn btn-outline" onclick="showPaymentModal()" style="flex: 1;">
+                    Позвонить
+                </button>
+                <button class="btn btn-outline" onclick="openReviewModal()" style="flex: 1;">
+                    Оставить отзыв
+                </button>
+            </div>
 
-        <div style="margin-top: 15px; text-align: center;">
-            <button class="btn btn-outline" onclick="reportProfile(${profileId})" style="background: rgba(255, 107, 53, 0.1); border-color: rgba(255, 107, 53, 0.3); width: 100%;">
-                Пожаловаться на анкету
-            </button>
-        </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <button class="btn btn-outline" onclick="reportProfile(${profileId})" style="background: rgba(255, 107, 53, 0.1); border-color: rgba(255, 107, 53, 0.3); width: 100%;">
+                    Пожаловаться на анкету
+                </button>
+            </div>
+        ` : `
+            <div style="margin-top: 30px; padding: 20px; background: rgba(255, 149, 0, 0.1); border: 1px solid rgba(255, 149, 0, 0.3); border-radius: 10px; text-align: center;">
+                <p style="color: var(--text-gray); margin: 0;">Для доступа к контактам и возможности оставить отзыв войдите как клиент</p>
+            </div>
+        `}
 
         <div class="reviews-section">
             <h3>Отзывы (${reviews.length})</h3>
@@ -1443,11 +1449,23 @@ function openProfileModal(profileId) {
 
 // ==================== ОПЛАТА ====================
 function showPaymentModal() {
+    // Проверка: звонить могут только клиенты
+    if (!AppState.currentUser || AppState.currentUser.type !== 'client') {
+        showToast('Просматривать контакты могут только зарегистрированные клиенты', 'warning', 5000);
+        return;
+    }
+
     closeModal('profileModal');
     showModal('paymentModal');
 }
 
 function selectPaymentMethod(method) {
+    // Проверка: звонить могут только клиенты
+    if (!AppState.currentUser || AppState.currentUser.type !== 'client') {
+        showToast('Просматривать контакты могут только зарегистрированные клиенты', 'warning', 5000);
+        return;
+    }
+
     closeModal('paymentModal');
 
     const profile = AppState.profiles.find(p => p.id === AppState.currentProfileView);
@@ -1543,6 +1561,12 @@ function showMyProfileView() {
 
 // ==================== ЖАЛОБЫ ====================
 function reportProfile(profileId) {
+    // Проверка: жаловаться могут только клиенты
+    if (!AppState.currentUser || AppState.currentUser.type !== 'client') {
+        showToast('Подавать жалобы могут только зарегистрированные клиенты', 'warning', 5000);
+        return;
+    }
+
     const profile = AppState.profiles.find(p => p.id === profileId);
     if (!profile) return;
 
@@ -1689,6 +1713,24 @@ function switchFilterTab(tabName) {
 
 function applyFilters() {
     let filtered = [...AppState.profiles];
+
+    // ФИЛЬТР ПО СТАТУСУ: показываем только одобренные анкеты
+    // ИСКЛЮЧЕНИЕ: если пользователь - модель, показываем её собственную анкету, даже если не одобрена
+    filtered = filtered.filter(p => {
+        // Если анкета одобрена - показываем всем
+        if (p.verified) return true;
+
+        // Если пользователь - модель и это её анкета - показываем
+        if (AppState.currentUser &&
+            AppState.currentUser.type === 'model' &&
+            AppState.currentProfile &&
+            p.id === AppState.currentProfile.id) {
+            return true;
+        }
+
+        // В остальных случаях не показываем неодобренные анкеты
+        return false;
+    });
 
     // Сортировка с приоритетом для премиум и эксклюзив тарифов
     const getPlanPriority = (plan) => {
